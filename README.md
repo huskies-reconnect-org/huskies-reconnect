@@ -27,12 +27,13 @@ I want this repo to be clear enough that anyone on the team can open it, underst
 ## How it works
 
 ```mermaid
+%%{init: {'flowchart': {'useMaxWidth': false}}}%%
 flowchart LR
-    A["Join course<br/>Profile embedded"]:::join --> B["Match<br/>Embedding similarity"]:::match
-    B --> C["Generate<br/>AI drafts icebreaker"]:::generate
-    C --> D["Safety check<br/>Filters before sending"]:::safety
-    D --> E["Resurfaces later<br/>Semester-end trigger"]:::resurface
-    E -.feedback improves matching.-> B
+    A["Join course<br/>Embeds profile"]:::join --> B["Match<br/>Similarity scan"]:::match
+    B --> C["Generate<br/>Drafts intro"]:::generate
+    C --> D["Safety check<br/>Filters message"]:::safety
+    D --> E["Resurfaces<br/>At semester end"]:::resurface
+    E -.feedback.-> B
 
     classDef join fill:#60a5fa,stroke:#1e3a8a,stroke-width:2px,color:#fff
     classDef match fill:#a78bfa,stroke:#4c1d95,stroke-width:2px,color:#fff
@@ -54,10 +55,11 @@ Full architecture notes: [`docs/architecture.md`](docs/architecture.md)
 ## Repository map
 
 ```mermaid
+%%{init: {'flowchart': {'useMaxWidth': false}}}%%
 flowchart TD
-    schema["schema/<br/>DB schema + shared types"]:::schema --> web["apps/web<br/>Next.js frontend · :3000"]:::web
-    schema --> api["apps/api<br/>FastAPI backend · :8000"]:::api
-    api --> ai["packages/ai-pipeline<br/>LangGraph + Gemini matching & generation"]:::ai
+    schema["schema/<br/>DB + types"]:::schema --> web["apps/web<br/>Next.js · 3000"]:::web
+    schema --> api["apps/api<br/>FastAPI · 8000"]:::api
+    api --> ai["ai-pipeline<br/>LangGraph + Gemini"]:::ai
     api --> db[("Supabase<br/>Postgres + pgvector")]:::db
 
     classDef schema fill:#fbbf24,stroke:#92400e,stroke-width:2px,color:#000
