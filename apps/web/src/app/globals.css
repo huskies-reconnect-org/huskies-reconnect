@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+/*
+ * Huskies Reconnect design tokens: "Study Deck" in Huskies colors.
+ * Docs: docs/ui/README.md (tokens) and docs/ui/rules.md (what not to do).
+ *
+ * The theme starts by wiping Tailwind's defaults for color, fonts, type sizes,
+ * radii, shadows, blur and animation. Only the tokens below exist, so classes
+ * like bg-purple-500, shadow-lg, backdrop-blur-md or animate-bounce do not
+ * compile. Add a token here (and to docs/ui/README.md) before using a new value.
+ */
+@theme {
+  --color-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+  --blur-*: initial;
+  --animate-*: initial;
+
+  /* Ground: the study table */
+  --color-heather: #d3d3cf; /* page background */
+  --color-heather-deep: #bdbdb8; /* dividers and borders on the page background */
+
+  /* Index cards */
+  --color-card: #f7f6f1; /* card surface */
+  --color-card-edge: #e4e3da; /* first card under the stack, chips, skeleton blocks */
+  --color-card-edge-deep: #b9b8af; /* second card under the stack */
+  --color-rule: #d8d4c8; /* ruled lines and dashed dividers on cards */
+  --color-field: #fbfaf6; /* input fill */
+
+  /* Ink: jersey black */
+  --color-ink: #1c1c1c; /* text, borders, header band */
+  --color-ink-raised: #2e2e2e; /* raised surface on ink */
+  --color-muted: #4a4b47; /* secondary text on heather and on cards (5.8:1 on heather) */
+  --color-on-ink: #f4f1ea; /* text on ink */
+  --color-on-ink-muted: #bdbdb8; /* secondary text on ink */
+
+  /* Northeastern red */
+  --color-red: #c8102e; /* fills: primary buttons, marker underline, selection outline, progress */
+  --color-red-ink: #a50d26; /* red TEXT and primary hover (red #c8102e fails 4.5:1 on heather) */
+  --color-on-red: #f7f6f1; /* text on red */
+
+  /* Type scale. Pair each size with a voice utility below. */
+  --text-label: 0.75rem;
+  --text-label--line-height: 1.4;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.45;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5;
+  --text-lead: 1.125rem;
+  --text-lead--line-height: 1.5;
+  --text-note: 1.1875rem; /* casual text on cards. Not "card": that name is taken by the color. */
+  --text-note--line-height: 1.5;
+  --text-heading: 1.5rem;
+  --text-heading--line-height: 1.2;
+  --text-display-sm: 2.125rem;
+  --text-display-sm--line-height: 1.08;
+  --text-name: 2.5rem;
+  --text-name--line-height: 1.05;
+  --text-display: 2.75rem;
+  --text-display--line-height: 1.05;
+
+  /* Radii: deliberately not uniform. Pills use rounded-full. */
+  --radius-tag: 4px;
+  --radius-field: 8px;
+  --radius-tile: 10px;
+  --radius-card: 14px;
+
+  /* Motion: one quiet pulse for skeletons. The card flip uses transitions. */
+  --animate-pulse-soft: pulse-soft 1.8s ease-in-out infinite;
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+}
+
+@theme inline {
+  /* --font-recursive is set by next/font in src/app/layout.tsx */
+  --font-sans: var(--font-recursive), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-recursive), ui-monospace, monospace;
+}
+
+/*
+ * Recursive has three voices. Use exactly one per element.
+ *   voice-casual: people, names, intros, headings (CASL axis on)
+ *   voice-linear: interface text, buttons, forms (the default)
+ *   voice-mono:   labels, course codes, counts (MONO axis on)
+ */
+@utility voice-casual {
+  font-variation-settings: "CASL" 1;
+}
+@utility voice-linear {
+  font-variation-settings: normal;
+}
+@utility voice-mono {
+  font-variation-settings: "MONO" 1;
+}
+
+/* Red marker underline for what two classmates share. Use <Marker>. */
+@utility mark-shared {
+  background: none;
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-color: var(--color-red);
+  text-decoration-thickness: 0.2em;
+  text-underline-offset: 0.12em;
+  text-decoration-skip-ink: none;
+}
+
+/* Index-card ruling for the intro side. Line height must equal the rule gap (2rem). */
+@utility ruled {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 calc(2rem - 1px),
+    var(--color-rule) calc(2rem - 1px) 2rem
+  );
+  line-height: 2rem;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    background-color: var(--color-heather);
+  }
+
+  body {
+    background-color: var(--color-heather);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-red);
+    color: var(--color-on-red);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

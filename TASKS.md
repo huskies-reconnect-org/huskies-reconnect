@@ -5,7 +5,7 @@ Claim a task by adding your name next to it, then open a matching GitHub Issue t
 **Deadline: full build complete by the first week of December.**
 
 ## Phase 1 — Foundation (Nov 11–16, this week)
-- [ ] Set up Next.js + Tailwind frontend skeleton — Owner:
+- [x] Set up Next.js + Tailwind frontend skeleton — Owner: Shaad Qureshi
 - [ ] Set up FastAPI backend skeleton (folder structure, basic routes) — Owner:
 - [ ] Create shared Supabase project + schema (users, courses, course_members) — Owner:
 - [ ] .edu email auth flow (Supabase magic link) — Owner:
