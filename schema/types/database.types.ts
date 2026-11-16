@@ -112,6 +112,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      hook_before_user_created: { Args: { event: Json }; Returns: Json }
       is_course_member: { Args: { p_course_id: string }; Returns: boolean }
     }
     Enums: {

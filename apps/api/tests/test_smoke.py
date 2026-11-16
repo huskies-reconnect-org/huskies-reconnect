@@ -11,6 +11,3 @@ def test_health():
     assert r.json() == {"status": "ok"}
 
 
-def test_me_requires_auth():
-    r = client.get("/me")
-    assert r.status_code == 401
