@@ -1,0 +1,21 @@
+# Render Blueprint — New > Blueprint in the Render dashboard, point at this repo.
+services:
+  - type: web
+    name: huskies-reconnect-api
+    runtime: python
+    plan: free
+    rootDir: apps/api
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: ENV
+        value: production
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: DATABASE_URL
+        sync: false

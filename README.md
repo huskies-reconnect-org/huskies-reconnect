@@ -104,8 +104,9 @@ npm run dev        # http://localhost:3000
 
 # Backend (separate terminal)
 cd apps/api
-pip install -r requirements.txt
-uvicorn main:app --reload   # http://localhost:8000
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt
+uvicorn app.main:app --reload   # http://localhost:8000
 ```
 
 Environment variables (`.env`, never commit this) will be shared separately in Teams — covers Supabase connection string and Gemini API key.
