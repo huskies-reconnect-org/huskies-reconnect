@@ -11,8 +11,8 @@ Simplified or preloaded pieces are fine where they don't weaken that flow. Progr
    - [ ] Email sending via Resend (registered with NU email for now; verified custom domain before the demo)
    - [ ] Frontend deployed to Vercel
    - [ ] Render env vars confirmed (`/health/ready` returns ok)
-   - [ ] PR #7 merged into `main`
-2. [ ] **Course join:** list + join endpoints, one page with Join buttons, preloaded course list
+   - [x] PR #7 merged into `main`
+2. [x] **Course join:** list + join endpoints, one page with Join buttons, preloaded course list
 3. [ ] **Profile + embeddings:** form (major, interests, goals), embedding via Gemini API stored in pgvector
 4. [ ] **Matching page:** pgvector similarity among classmates in the same course
 5. [ ] **Demo classmates:** ~8 seeded students with realistic profiles (`is_demo` flag)

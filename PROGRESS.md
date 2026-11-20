@@ -17,3 +17,9 @@ Newest entries at the bottom. Each entry: date, what's done, how it was verified
 - Diagnosed email failure from Supabase auth logs: Resend's test sender only delivers to the account owner's address (was a Gmail account). Fix in progress: Resend re-registered with NU email.
 - Re-planned as a solo thin slice for the Dec 5 demo; rewrote `TASKS.md`.
 - Added `/health/ready`: reports whether the API can reach Postgres and Supabase's signing keys (ok / error / not_configured, no values). Verified locally: both ok.
+- Merged PR #7 (Phase 1 backbone) into `main`; issues #3 and #4 closed.
+- Deployed `/health/ready` on Render: `auth_keys` ok, `database` error. Likely the unencoded `@` in Render's `DATABASE_URL`; dashboard fix pending.
+
+## 2026-11-20
+- **To-do #2, course join:** 8 preloaded Fall 2026 courses (migration, pushed to Supabase), `GET /courses` and idempotent `POST /courses/{id}/join`, `/courses` page with Join buttons, shared `api()` helper and login guard.
+- Added integration tests that run against a real Postgres rebuilt from the migrations (`scripts/test-db.sh`). Verified: 18 tests pass (7 new: list, join, per-user `joined`, idempotency, 404, 422, 409, 401); frontend type-checks, lints, builds; 8 courses confirmed in the hosted database. Browser check of `/courses` pending.
