@@ -13,7 +13,7 @@ Simplified or preloaded pieces are fine where they don't weaken that flow. Progr
    - [ ] Render env vars confirmed (`/health/ready` returns ok)
    - [x] PR #7 merged into `main`
 2. [x] **Course join:** list + join endpoints, one page with Join buttons, preloaded course list
-3. [ ] **Profile + embeddings:** form (major, interests, goals), embedding via Gemini API stored in pgvector
+3. [x] **Profile + embeddings:** *(live Gemini check pending API key)* form (major, interests, goals), embedding via Gemini API stored in pgvector
 4. [ ] **Matching page:** pgvector similarity among classmates in the same course
 5. [ ] **Demo classmates:** ~8 seeded students with realistic profiles (`is_demo` flag)
 6. [ ] **Icebreaker:** "Draft intro" button → Gemini → safety check → shown on screen

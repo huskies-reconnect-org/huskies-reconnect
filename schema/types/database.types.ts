@@ -84,25 +84,40 @@ export type Database = {
         Row: {
           created_at: string
           email: string
+          embedded_at: string | null
+          embedding: string | null
+          embedding_model: string | null
           full_name: string | null
+          goals: string | null
           grad_year: number | null
           id: string
+          interests: string | null
           major: string | null
         }
         Insert: {
           created_at?: string
           email: string
+          embedded_at?: string | null
+          embedding?: string | null
+          embedding_model?: string | null
           full_name?: string | null
+          goals?: string | null
           grad_year?: number | null
           id: string
+          interests?: string | null
           major?: string | null
         }
         Update: {
           created_at?: string
           email?: string
+          embedded_at?: string | null
+          embedding?: string | null
+          embedding_model?: string | null
           full_name?: string | null
+          goals?: string | null
           grad_year?: number | null
           id?: string
+          interests?: string | null
           major?: string | null
         }
         Relationships: []
