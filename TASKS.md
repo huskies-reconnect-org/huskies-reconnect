@@ -9,7 +9,7 @@ Simplified or preloaded pieces are fine where they don't weaken that flow. Progr
 
 1. [ ] **Ship the foundation**
    - [ ] Email sending via Resend (registered with NU email for now; verified custom domain before the demo)
-   - [ ] Frontend deployed to Vercel
+   - [x] Frontend deployed to Vercel: https://huskies-reconnect.vercel.app
    - [x] Render env vars confirmed (`/health/ready` returns ok)
    - [x] PR #7 merged into `main`
 2. [x] **Course join:** list + join endpoints, one page with Join buttons, preloaded course list

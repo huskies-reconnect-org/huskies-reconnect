@@ -122,6 +122,6 @@ More detail: [`apps/api/README.md`](apps/api/README.md) (endpoints, tests, demo 
 
 ## Status
 
-🚧 Building toward the **Dec 5, 2026** NU Launch Labs showcase. Plan: [`TASKS.md`](TASKS.md) · Log: [`PROGRESS.md`](PROGRESS.md)
+🚧 Building toward the **Dec 5, 2026** NU Launch Labs showcase. Live: **https://huskies-reconnect.vercel.app** Plan: [`TASKS.md`](TASKS.md) · Log: [`PROGRESS.md`](PROGRESS.md)
 
 Ideas and pushback are welcome as GitHub Issues.
