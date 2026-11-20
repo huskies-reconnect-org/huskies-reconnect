@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api, ApiError, type Course, type Match } from "@/lib/api";
 import { useRequireSession } from "@/lib/useSession";
+import { MatchCard } from "@/components/MatchCard";
 
 type State =
   | { kind: "loading" }
@@ -69,27 +70,7 @@ export default function CourseMatchesPage() {
 
       {state.kind === "ready" && state.matches.length > 0 && (
         <ul className="flex flex-col gap-3">
-          {state.matches.map((m) => (
-            <li key={m.user_id} className="flex flex-col gap-2 rounded border p-4">
-              <div className="flex items-baseline justify-between gap-4">
-                <p className="font-medium">
-                  {m.full_name ?? "Classmate"}
-                  {m.is_demo && (
-                    <span className="ml-2 rounded bg-gray-100 px-1.5 py-0.5 text-xs font-normal text-gray-600"
-                      title="Fictional student seeded for the demo">
-                      Demo profile
-                    </span>
-                  )}
-                </p>
-                <span className="text-xs text-gray-500">{Math.round(m.similarity * 100)}% match</span>
-              </div>
-              <p className="text-sm text-gray-600">
-                {[m.major, m.grad_year && `Class of ${m.grad_year}`].filter(Boolean).join(" · ")}
-              </p>
-              {m.interests && <p className="text-sm"><span className="font-medium">Interests:</span> {m.interests}</p>}
-              {m.goals && <p className="text-sm"><span className="font-medium">Goals:</span> {m.goals}</p>}
-            </li>
-          ))}
+          {state.matches.map((m) => <MatchCard key={m.user_id} courseId={id} match={m} />)}
         </ul>
       )}
     </main>

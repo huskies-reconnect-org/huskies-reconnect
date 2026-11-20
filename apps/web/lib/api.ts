@@ -74,3 +74,5 @@ export type Match = {
   similarity: number;
   is_demo: boolean;
 };
+
+export type Icebreaker = { status: "ok" | "blocked"; message: string | null; model: string };
