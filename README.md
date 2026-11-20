@@ -5,7 +5,7 @@
 Canvas shows you exactly who's in your class. The moment the course ends, that connection disappears. Huskies Reconnect fixes that — AI-matched classmate connections that persist past the semester, and resurface later when they actually matter.
 
 ![status](https://img.shields.io/badge/status-in%20development-yellow)
-![stack](https://img.shields.io/badge/stack-Next.js%20%7C%20FastAPI%20%7C%20LangGraph-blue)
+![stack](https://img.shields.io/badge/stack-Next.js%20%7C%20FastAPI%20%7C%20Supabase%20%7C%20Gemini-blue)
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
 Built for **NU Launch Labs** · Fall 2026 · Targeting full build by early December
@@ -48,8 +48,6 @@ flowchart LR
 | **Student (post-course)** | The same classmate group, reactivated later | A semester-end trigger converts the course group into a persistent "alumni of this class" space |
 | **Everyone** | Messages that are never inappropriate or spammy | Every AI-drafted message passes a safety/moderation check before it's ever shown |
 
-Full architecture notes: [`docs/architecture.md`](docs/architecture.md)
-
 ---
 
 ## Repository map
@@ -57,10 +55,11 @@ Full architecture notes: [`docs/architecture.md`](docs/architecture.md)
 ```mermaid
 %%{init: {'flowchart': {'useMaxWidth': false}}}%%
 flowchart TD
-    schema["schema/<br/>DB + types"]:::schema --> web["apps/web<br/>Next.js · 3000"]:::web
-    schema --> api["apps/api<br/>FastAPI · 8000"]:::api
-    api --> ai["ai-pipeline<br/>LangGraph + Gemini"]:::ai
-    api --> db[("Supabase<br/>Postgres + pgvector")]:::db
+    web["apps/web<br/>Next.js · Vercel"]:::web -->|Supabase session token| api["apps/api<br/>FastAPI · Render"]:::api
+    web -->|email code sign-in| auth["Supabase Auth<br/>@northeastern.edu only"]:::db
+    api --> db[("Supabase Postgres<br/>+ pgvector")]:::db
+    api --> gemini["Gemini API<br/>embeddings + intros"]:::ai
+    schema["schema/<br/>migrations + types"]:::schema --> db
 
     classDef schema fill:#fbbf24,stroke:#92400e,stroke-width:2px,color:#000
     classDef web fill:#60a5fa,stroke:#1e3a8a,stroke-width:2px,color:#fff
@@ -71,60 +70,58 @@ flowchart TD
 
 | Path | What it is |
 |---|---|
-| `apps/web/` | Next.js + TypeScript + Tailwind frontend |
-| `apps/api/` | FastAPI backend — auth, course join, matching endpoints |
-| `packages/ai-pipeline/` | LangGraph pipeline: ingest → match → generate → safety → resurface |
-| `schema/` | Database schema (Postgres + pgvector), shared types |
-| `docs/` | Architecture notes, setup guides |
+| `apps/web/` | Next.js + TypeScript + Tailwind: sign-in, courses, profile, matches, icebreakers |
+| `apps/api/` | FastAPI: token verification, courses, profiles + embeddings, matching, icebreakers, safety checks |
+| `schema/` | Supabase migrations (Postgres + pgvector, row-level security) and generated TypeScript types |
+| `.github/workflows/` | CI: API tests on Postgres 17 + pgvector, web lint / type-check / build |
+
+---
+
+## How the pieces work
+
+- **Sign-in:** a 6-digit email code (not a magic link, because Outlook's link scanner uses those up). A Supabase signup hook rejects anything but `@northeastern.edu`.
+- **Matching:** your major, interests and goals are embedded with Gemini (`gemini-embedding-2`, 768 dims) and stored in pgvector. Classmates in the same course are ranked by cosine similarity, and only those above a relevance bar show up.
+- **Icebreakers:** Gemini (`gemini-3.5-flash-lite`) drafts a short intro for a matched pair. Before it's shown it passes three layers: Gemini's safety filters, profile text passed as data (not instructions) to resist prompt injection, and our own check that rejects links, contact details, profanity and placeholder text.
+- **After the semester:** the course becomes an alumni group. Former classmates still see each other, and intros switch to a "reconnecting" tone.
 
 ---
 
 ## Tech stack
 
-- **Frontend:** Next.js, TypeScript, Tailwind CSS
-- **Backend:** FastAPI (Python)
-- **Database:** PostgreSQL + pgvector (Supabase)
-- **AI / Agentic layer:** LangGraph, Google Gemini API
-- **Observability:** LangSmith
-- **Deployment:** Vercel (frontend), Render (backend)
+- **Frontend:** Next.js, TypeScript, Tailwind CSS (Vercel)
+- **Backend:** FastAPI, psycopg 3 (Render)
+- **Database / auth:** Supabase (Postgres + pgvector, Auth with email codes)
+- **AI:** Google Gemini API (embeddings and text generation)
+- **CI:** GitHub Actions
 
 ---
 
-## Getting started
+## Running it locally
 
 ```bash
-# Clone the repo
 git clone https://github.com/huskies-reconnect-org/huskies-reconnect.git
 cd huskies-reconnect
 
-# Frontend
-cd apps/web
-npm install
-npm run dev        # http://localhost:3000
-
-# Backend (separate terminal)
+# Backend (Python 3.12)
 cd apps/api
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
-uvicorn app.main:app --reload   # http://localhost:8000
+cp ../../.env.example .env          # fill in the API section
+uvicorn app.main:app --reload       # http://localhost:8000
+
+# Frontend (separate terminal)
+cd apps/web
+npm install
+cp ../../.env.example .env.local    # fill in the NEXT_PUBLIC_* values
+npm run dev                         # http://localhost:3000
 ```
 
-Environment variables (`.env`, never commit this) will be shared separately in Teams — covers Supabase connection string and Gemini API key.
-
----
-
-## How to contribute
-
-1. Check [`TASKS.md`](TASKS.md) for the current phase's open tasks
-2. Claim a task by adding your name, then open a matching GitHub Issue
-3. Branch naming: `phase-1/your-task-name`
-4. Open a PR into `main` when ready — tag me for review
-5. Move your task across the [Project board](../../projects) as you go
-
-No task is anyone's permanently — if something stalls, speak up in the channel and we'll reassign.
+More detail: [`apps/api/README.md`](apps/api/README.md) (endpoints, tests, demo data), [`apps/web/README.md`](apps/web/README.md), [`schema/README.md`](schema/README.md) (migrations).
 
 ---
 
 ## Status
 
-🚧 **Phase 1 — Foundation** in progress. See [`TASKS.md`](TASKS.md) for the full breakdown by phase.
+🚧 Building toward the **Dec 5, 2026** NU Launch Labs showcase. Plan: [`TASKS.md`](TASKS.md) · Log: [`PROGRESS.md`](PROGRESS.md)
+
+Ideas and pushback are welcome as GitHub Issues.

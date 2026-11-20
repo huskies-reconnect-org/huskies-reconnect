@@ -8,6 +8,8 @@ npm install
 npm run dev                        # http://localhost:3000
 ```
 
-- `/login`: minimal @northeastern.edu sign-in with a 6-digit email code (to be restyled by the frontend team)
-- `/`: placeholder home that shows the session and calls the API's `/me`
+- `/login`: @northeastern.edu sign-in with a 6-digit email code
+- `/`: home with links to profile and courses
+- `/profile`: major, interests, goals (used for matching)
+- `/courses`: join courses; `/courses/[id]`: ranked classmates, Draft intro, alumni view
 - `lib/supabase.ts`: browser Supabase client, typed from `schema/types/database.types.ts` (imported as `@schema/...`)
