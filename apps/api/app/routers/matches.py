@@ -20,12 +20,13 @@ class Match(BaseModel):
     interests: str | None
     goals: str | None
     similarity: float
+    is_demo: bool
 
 
 # Operator is schema-qualified so this works whatever the search_path is.
 _MATCHES_SQL = """
     with me as (select embedding from public.users where id = %(me)s)
-    select u.id as user_id, u.full_name, u.major, u.grad_year, u.interests, u.goals,
+    select u.id as user_id, u.full_name, u.major, u.grad_year, u.interests, u.goals, u.is_demo,
            1 - (u.embedding OPERATOR(extensions.<=>) me.embedding) as similarity
       from public.course_members m
       join public.users u on u.id = m.user_id

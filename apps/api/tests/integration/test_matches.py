@@ -88,7 +88,7 @@ def test_response_fields(client, student, course):
     student("Bob", vec(1, 0.1), course)
     client.login(me)
     m = client.get(f"/courses/{course}/matches").json()[0]
-    assert set(m) == {"user_id", "full_name", "major", "grad_year", "interests", "goals", "similarity"}
+    assert set(m) == {"user_id", "full_name", "major", "grad_year", "interests", "goals", "similarity", "is_demo"}
     assert "email" not in m
 
 

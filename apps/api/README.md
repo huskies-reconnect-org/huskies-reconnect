@@ -30,3 +30,12 @@ They rebuild the schema from `schema/supabase/migrations/` on every run.
 | POST | `/courses/{id}/join` | yes | Join a course (idempotent) |
 | GET | `/courses/{id}/matches` | yes | Classmates ranked by profile similarity (members only, above `MATCH_MIN_SIMILARITY`) |
 | PUT | `/me/profile` | yes | Save profile; re-embeds via Gemini when major/interests/goals change |
+
+## Demo classmates
+8 fictional students in CS5100 (2 also in CS6120), flagged `is_demo`, with real Gemini embeddings.
+They can't sign in (unusable emails, permanently banned in Supabase Auth).
+```bash
+python scripts/seed_demo.py                  # dry run: shows target DB and students
+python scripts/seed_demo.py --yes            # seed or update (needs GEMINI_API_KEY)
+python scripts/seed_demo.py --remove --yes   # delete all demo users after the showcase
+```

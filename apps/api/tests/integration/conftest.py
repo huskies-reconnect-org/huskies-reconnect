@@ -38,7 +38,13 @@ create schema auth;
 create schema extensions;
 grant usage on schema public, auth to anon, authenticated;
 alter default privileges in schema public grant all on tables to anon, authenticated;
-create table auth.users (id uuid primary key default gen_random_uuid(), email text, raw_user_meta_data jsonb);
+create table auth.users (
+  instance_id uuid, id uuid primary key default gen_random_uuid(), aud varchar, role varchar,
+  email text, encrypted_password varchar, email_confirmed_at timestamptz,
+  raw_app_meta_data jsonb, raw_user_meta_data jsonb, banned_until timestamptz,
+  created_at timestamptz, updated_at timestamptz,
+  confirmation_token varchar, recovery_token varchar, email_change_token_new varchar, email_change varchar
+);
 create function auth.uid() returns uuid language sql stable as
   $f$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $f$;
 """
