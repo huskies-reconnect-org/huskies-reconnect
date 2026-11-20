@@ -1,8 +1,51 @@
-from fastapi import APIRouter
+import asyncio
+
+from fastapi import APIRouter, Response, status
+from starlette.concurrency import run_in_threadpool
+
+from app import db
+from app.config import get_settings
+from app.deps import get_jwks_client
 
 router = APIRouter(tags=["health"])
 
 
 @router.get("/health")
 async def health() -> dict[str, str]:
+    """Liveness: the process is up. Render's health check uses this, so it never
+    depends on the database or Supabase."""
     return {"status": "ok"}
+
+
+async def _check_database() -> str:
+    if db.pool is None:
+        return "not_configured"
+    try:
+        async with asyncio.timeout(5):
+            async with db.pool.connection() as conn:
+                await conn.execute("select 1")
+        return "ok"
+    except Exception:
+        return "error"
+
+
+async def _check_auth_keys() -> str:
+    if not get_settings().supabase_url:
+        return "not_configured"
+    try:
+        keys = await asyncio.wait_for(run_in_threadpool(lambda: get_jwks_client().get_jwk_set()), 5)
+        return "ok" if keys.keys else "error"
+    except Exception:
+        return "error"
+
+
+@router.get("/health/ready")
+async def ready(response: Response) -> dict:
+    """Readiness: can the API reach Postgres and Supabase's signing keys?
+    Reports only ok / error / not_configured, never config values."""
+    database, auth_keys = await asyncio.gather(_check_database(), _check_auth_keys())
+    checks = {"database": database, "auth_keys": auth_keys}
+    ok = all(v == "ok" for v in checks.values())
+    if not ok:
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    return {"status": "ok" if ok else "degraded", "checks": checks}

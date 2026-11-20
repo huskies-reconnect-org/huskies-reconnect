@@ -1,38 +1,32 @@
-# Huskies Reconnect — Task Board 🐾
+# Huskies Reconnect: Task Board 🐾
 
-Claim a task by adding your name next to it, then open a matching GitHub Issue tagged with the phase label.
+Solo build. **Demo: Dec 5, 2026.**
 
-**Deadline: full build complete by the first week of December.**
+Goal: one working flow on the deployed site: **sign in → join course → see a match → get an icebreaker.**
+Simplified or preloaded pieces are fine where they don't weaken that flow. Progress log: [`PROGRESS.md`](PROGRESS.md).
 
-## Phase 1 — Foundation (Nov 11–16, this week)
-- [ ] Set up Next.js + Tailwind frontend skeleton — Owner:
-- [ ] Set up FastAPI backend skeleton (folder structure, basic routes) — Owner:
-- [ ] Create shared Supabase project + schema (users, courses, course_members) — Owner:
-- [ ] .edu email auth flow (Supabase magic link) — Owner:
-- [ ] Deploy empty skeleton (Vercel + Render) so the pipeline exists — Owner:
+## To-do (in order)
 
-## Phase 2 — Core Features (Nov 17–23)
-- [ ] Course search + join UI — Owner:
-- [ ] Course search + join API — Owner:
-- [ ] Student profile form (interests, major, goals) — Owner:
-- [ ] Embedding generation (Gemini API) + store in pgvector — Owner:
-- [ ] Matching query (cosine similarity, top-k classmates) — Owner:
-- [ ] Basic dashboard showing matched classmates (no AI message yet) — Owner:
+1. [ ] **Ship the foundation**
+   - [ ] Email sending via Resend (registered with NU email for now; verified custom domain before the demo)
+   - [ ] Frontend deployed to Vercel
+   - [ ] Render env vars confirmed (`/health/ready` returns ok)
+   - [ ] PR #7 merged into `main`
+2. [ ] **Course join:** list + join endpoints, one page with Join buttons, preloaded course list
+3. [ ] **Profile + embeddings:** form (major, interests, goals), embedding via Gemini API stored in pgvector
+4. [ ] **Matching page:** pgvector similarity among classmates in the same course
+5. [ ] **Demo classmates:** ~8 seeded students with realistic profiles (`is_demo` flag)
+6. [ ] **Icebreaker:** "Draft intro" button → Gemini → safety check → shown on screen
+7. [ ] **Stretch, only if time allows:** "Simulate semester end" button (course becomes an alumni group)
+8. [ ] **Rehearsal:** full pass on the deployed site, bug fixes, demo script
 
-## Phase 3 — AI / Agentic Layer (Nov 17–30, can overlap Phase 2)
-- [ ] LangGraph pipeline wiring (ingest → match → generate → safety) — Owner:
-- [ ] Icebreaker generation (Gemini) — Owner:
-- [ ] Safety/moderation filter before sending — Owner:
-- [ ] Feedback tracking (accepted/ignored matches) — Owner:
-- [ ] Resurfacing scheduler (semester-end trigger) — Owner:
+## Deliberately out of scope for Dec 5
+- LangGraph pipeline orchestration and LangSmith tracing
+- Real resurfacing scheduler (#7 simulates it)
+- Match feedback tracking (accepted / ignored)
+- Course search
+- Responsive design and visual polish beyond "clean and usable"
 
-## Phase 4 — Polish & Demo Prep (Dec 1–7)
-- [ ] UI polish + responsive design — Owner:
-- [ ] End-to-end testing — Owner:
-- [ ] Bug fixes from testing — Owner:
-- [ ] README + architecture diagram — Owner:
-- [ ] Demo script + slides for the showcase — Owner:
-
----
-
-Questions or stuck on something? Post in the channel — this board keeps us organized, not boxed in.
+## How work lands
+- Small PRs, merged into `main` quickly; `main` is always deployable and is what Vercel and Render deploy.
+- Every completed item gets a dated entry in `PROGRESS.md`.
