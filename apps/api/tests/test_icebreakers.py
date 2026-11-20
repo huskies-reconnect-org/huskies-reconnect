@@ -15,6 +15,12 @@ def anyio_backend():
     return "asyncio"
 
 
+@pytest.fixture(autouse=True)
+def no_retry_delay(monkeypatch):
+    from app import icebreakers
+    monkeypatch.setattr(icebreakers, "RETRY_DELAY_S", 0)
+
+
 def _gen(handler):
     return GeminiGenerator("k", "gemini-3.5-flash-lite",
                            client=httpx.AsyncClient(transport=httpx.MockTransport(handler)))

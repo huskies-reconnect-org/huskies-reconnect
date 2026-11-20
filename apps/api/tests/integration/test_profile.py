@@ -28,7 +28,7 @@ def test_save_profile_embeds_and_stores_vector(client, make_user, db, embedder):
     dims, model, norm = db.execute(
         "select extensions.vector_dims(embedding), embedding_model, extensions.vector_norm(embedding)"
         " from public.users where id = %s", (uid,)).fetchone()
-    assert dims == 768 and model == "fake-embedding"
+    assert dims == 768 and model == "fake-embedding#ig1"
     assert norm == pytest.approx(1.0, abs=1e-5)
     assert embedder.calls == 1
 
@@ -36,9 +36,18 @@ def test_save_profile_embeds_and_stores_vector(client, make_user, db, embedder):
 def test_unchanged_profile_skips_embedding(client, make_user, embedder):
     client.login(make_user())
     client.put("/me/profile", json=PROFILE)
-    r = client.put("/me/profile", json={**PROFILE, "full_name": "Alice C."})  # name isn't embedded
+    r = client.put("/me/profile", json={**PROFILE, "full_name": "Alice C.", "major": "MS AI"})  # not embedded
     assert r.json()["embedding_status"] == "unchanged"
     assert embedder.calls == 1
+
+
+def test_outdated_embedding_format_is_redone_even_if_text_unchanged(client, make_user, embedder, db):
+    uid = make_user()
+    client.login(uid)
+    client.put("/me/profile", json=PROFILE)
+    db.execute("update public.users set embedding_model = 'fake-embedding#old' where id = %s", (uid,))
+    assert client.put("/me/profile", json=PROFILE).json()["embedding_status"] == "updated"
+    assert embedder.calls == 2
 
 
 def test_changed_interests_re_embed(client, make_user, embedder):
@@ -67,7 +76,7 @@ def test_failure_after_success_keeps_previous_embedding(client, make_user, embed
     r = client.put("/me/profile", json={**PROFILE, "goals": "Something new"})
     assert r.json()["embedding_status"] == "failed"
     assert r.json()["matchable"] is True
-    assert db.execute("select embedding_model from public.users where id = %s", (uid,)).fetchone()[0] == "fake-embedding"
+    assert db.execute("select embedding_model from public.users where id = %s", (uid,)).fetchone()[0] == "fake-embedding#ig1"
 
 
 @pytest.mark.parametrize("patch", [

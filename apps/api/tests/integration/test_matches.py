@@ -30,7 +30,7 @@ def student(db, make_user):
         uid = make_user(name)
         db.execute(
             """update public.users set full_name = %s, major = 'CS', interests = 'x', goals = 'y',
-                      embedding = %s::extensions.vector where id = %s""",
+                      embedding = %s::extensions.vector, embedding_model = 'test#ig1' where id = %s""",
             (name, embedding, uid))
         for c in courses:
             db.execute("insert into public.course_members (user_id, course_id, status) values (%s, %s, %s)",
@@ -88,7 +88,8 @@ def test_response_fields(client, student, course):
     student("Bob", vec(1, 0.1), course)
     client.login(me)
     m = client.get(f"/courses/{course}/matches").json()[0]
-    assert set(m) == {"user_id", "full_name", "major", "grad_year", "interests", "goals", "similarity", "is_demo"}
+    assert set(m) == {"user_id", "full_name", "major", "grad_year", "interests", "goals", "similarity",
+                      "strength", "is_demo"}
     assert "email" not in m
 
 
@@ -118,3 +119,17 @@ def test_no_profile_embedding_is_409(client, make_user, db, course):
 def test_unknown_course_is_404(client, student, course):
     client.login(student("me", vec(1, 0), course))
     assert client.get(f"/courses/{uuid.uuid4()}/matches").status_code == 404
+
+
+def test_different_embedding_models_are_not_compared(client, student, course, db):
+    me = student("me", vec(1, 0), course)
+    other = student("other-format", vec(1, 0), course)
+    db.execute("update public.users set embedding_model = 'old#v0' where id = %s", (other,))
+    client.login(me)
+    assert client.get(f"/courses/{course}/matches").json() == []
+
+
+@pytest.mark.parametrize("sim, expected", [(0.95, "strong"), (0.88, "strong"), (0.86, "good"), (0.83, "possible")])
+def test_strength_bands(sim, expected):
+    from app.routers.matches import strength
+    assert strength(sim) == expected

@@ -3,6 +3,13 @@
 import { useState } from "react";
 import { api, type Icebreaker, type Match } from "@/lib/api";
 
+// Raw cosine similarity isn't shown: unrelated profiles still score ~0.8, which would read as "80%".
+const STRENGTH = {
+  strong: { label: "Strong match", className: "bg-green-100 text-green-800" },
+  good: { label: "Good match", className: "bg-blue-100 text-blue-800" },
+  possible: { label: "Possible match", className: "bg-gray-100 text-gray-700" },
+} as const;
+
 type Draft =
   | { kind: "idle" }
   | { kind: "loading" }
@@ -46,7 +53,9 @@ export function MatchCard({ courseId, match: m }: { courseId: string; match: Mat
             </span>
           )}
         </p>
-        <span className="text-xs text-gray-500">{Math.round(m.similarity * 100)}% match</span>
+        <span className={`rounded px-2 py-0.5 text-xs ${STRENGTH[m.strength].className}`}>
+          {STRENGTH[m.strength].label}
+        </span>
       </div>
       <p className="text-sm text-gray-600">
         {[m.major, m.grad_year && `Class of ${m.grad_year}`].filter(Boolean).join(" · ")}

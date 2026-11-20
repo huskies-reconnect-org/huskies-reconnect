@@ -4,12 +4,25 @@ import math
 import httpx
 import pytest
 
+from app import embeddings
 from app.embeddings import (EMBED_DIM, EmbeddingError, GeminiEmbedder, _extract_values,
                             normalize, profile_text, to_pgvector)
 
 
-def test_profile_text_skips_empty_parts():
-    assert profile_text("CS", None, " climbing ") == "Major: CS\nGoals: climbing"
+@pytest.fixture(autouse=True)
+def no_retry_delay(monkeypatch):
+    monkeypatch.setattr(embeddings, "RETRY_DELAY_S", 0)
+
+
+def test_profile_text_is_plain_interests_and_goals():
+    assert profile_text("NLP, climbing.", " Find a study group ") == "NLP, climbing. Find a study group."
+    assert profile_text(None, "climbing") == "climbing."
+    assert profile_text(" ", None) == ""
+
+
+def test_embedding_tag_includes_format():
+    from app.embeddings import EMBED_FORMAT, embedding_tag
+    assert embedding_tag("gemini-embedding-2") == f"gemini-embedding-2#{EMBED_FORMAT}"
 
 
 def test_normalize_unit_length():
@@ -47,24 +60,38 @@ async def test_request_shape_and_normalized_result():
         seen["body"] = json.loads(req.content)
         return _ok()
 
-    v = await _embedder(handler).embed("Major: CS")
+    v = await _embedder(handler).embed("NLP. Study group.")
     assert seen["url"].endswith("/v1beta/models/gemini-embedding-2:embedContent")
     assert seen["key"] == "test-key"
     assert seen["body"]["output_dimensionality"] == EMBED_DIM
-    assert seen["body"]["content"]["parts"][0]["text"] == "task: sentence similarity | query: Major: CS"
+    assert seen["body"]["content"]["parts"][0]["text"] == "task: sentence similarity | query: NLP. Study group."
     assert len(v) == EMBED_DIM and math.isclose(sum(x * x for x in v), 1.0, rel_tol=1e-9)
 
 
 @pytest.mark.anyio
-async def test_retries_once_on_429():
+@pytest.mark.parametrize("transient", [403, 429, 503])
+async def test_retries_transient_errors(transient):
     calls = []
 
     def handler(req):
         calls.append(1)
-        return httpx.Response(429) if len(calls) == 1 else _ok()
+        return httpx.Response(transient) if len(calls) < 3 else _ok()
 
     assert len(await _embedder(handler).embed("x")) == EMBED_DIM
-    assert len(calls) == 2
+    assert len(calls) == 3
+
+
+@pytest.mark.anyio
+async def test_gives_up_after_max_attempts():
+    calls = []
+
+    def handler(req):
+        calls.append(1)
+        return httpx.Response(403, json={"error": {"status": "PERMISSION_DENIED"}})
+
+    with pytest.raises(EmbeddingError, match="403"):
+        await _embedder(handler).embed("x")
+    assert len(calls) == 3
 
 
 @pytest.mark.anyio

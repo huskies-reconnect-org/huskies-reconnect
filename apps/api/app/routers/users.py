@@ -9,14 +9,15 @@ from pydantic import BaseModel, Field, StringConstraints
 from app.config import get_settings
 from app.db import get_conn
 from app.deps import get_current_user_id
-from app.embeddings import Embedder, EmbeddingError, get_embedder, profile_text, to_pgvector
+from app.embeddings import (Embedder, EmbeddingError, embedding_tag, get_embedder, profile_text,
+                            to_pgvector)
 
 log = logging.getLogger(__name__)
 router = APIRouter(tags=["users"])
 
 _ME_SELECT = """
     select id::text, email, full_name, major, grad_year, interests, goals,
-           embedding is not null as matchable
+           embedding is not null as matchable, embedding_model
       from public.users where id = %s
 """
 
@@ -82,11 +83,12 @@ async def update_profile(
 ) -> ProfileOut:
     current = await _load_me(conn, user_id)
 
-    new_text = profile_text(body.major, body.interests, body.goals)
-    old_text = profile_text(current["major"], current["interests"], current["goals"])
+    new_text = profile_text(body.interests, body.goals)
+    old_text = profile_text(current["interests"], current["goals"])
+    tag = embedding_tag(embedder.model)
 
     embedding: str | None = None
-    if new_text == old_text and current["matchable"]:
+    if new_text == old_text and current["matchable"] and current["embedding_model"] == tag:
         embedding_status = "unchanged"
     else:
         try:
@@ -105,7 +107,7 @@ async def update_profile(
                   embedding_model = case when %(embedding)s::text is null then embedding_model else %(model)s end,
                   embedded_at     = case when %(embedding)s::text is null then embedded_at else now() end
             where id = %(id)s""",
-        {**body.model_dump(), "embedding": embedding, "model": embedder.model, "id": user_id},
+        {**body.model_dump(), "embedding": embedding, "model": tag, "id": user_id},
     )
     row = await _load_me(conn, user_id)
     return ProfileOut(**_to_me(row).model_dump(), embedding_status=embedding_status)

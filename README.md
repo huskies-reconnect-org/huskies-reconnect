@@ -80,7 +80,7 @@ flowchart TD
 ## How the pieces work
 
 - **Sign-in:** a 6-digit email code (not a magic link, because Outlook's link scanner uses those up). A Supabase signup hook rejects anything but `@northeastern.edu`.
-- **Matching:** your major, interests and goals are embedded with Gemini (`gemini-embedding-2`, 768 dims) and stored in pgvector. Classmates in the same course are ranked by cosine similarity, and only those above a relevance bar show up.
+- **Matching:** your interests and goals are embedded with Gemini (`gemini-embedding-2`, 768 dims) and stored in pgvector. Classmates in the same course are ranked by cosine similarity; only those above a relevance bar tuned on real embeddings show up, labeled Strong / Good / Possible.
 - **Icebreakers:** Gemini (`gemini-3.5-flash-lite`) drafts a short intro for a matched pair. Before it's shown it passes three layers: Gemini's safety filters, profile text passed as data (not instructions) to resist prompt injection, and our own check that rejects links, contact details, profanity and placeholder text.
 - **After the semester:** the course becomes an alumni group. Former classmates still see each other, and intros switch to a "reconnecting" tone.
 

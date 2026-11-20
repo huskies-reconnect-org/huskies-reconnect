@@ -10,7 +10,7 @@ from dataclasses import dataclass
 import psycopg
 from psycopg.types.json import Jsonb
 
-from app.embeddings import Embedder, profile_text, to_pgvector
+from app.embeddings import Embedder, embedding_tag, profile_text, to_pgvector
 
 _NAMESPACE = uuid.UUID("6f1c9a52-3b8e-4d71-9a0e-5c2f7d4b8e11")
 DEMO_COURSES = ("CS5100", "CS6120")
@@ -68,7 +68,7 @@ STUDENTS: tuple[DemoStudent, ...] = (
 
 async def seed(conn: psycopg.AsyncConnection, embedder: Embedder) -> int:
     """Create or update every demo student. Embeds first, so a Gemini failure writes nothing."""
-    vectors = {s.slug: to_pgvector(await embedder.embed(profile_text(s.major, s.interests, s.goals)))
+    vectors = {s.slug: to_pgvector(await embedder.embed(profile_text(s.interests, s.goals)))
                for s in STUDENTS}
 
     async with conn.transaction():
@@ -103,7 +103,7 @@ async def seed(conn: psycopg.AsyncConnection, embedder: Embedder) -> int:
                     where id = %(id)s""",
                 {"id": s.id, "full_name": s.full_name, "major": s.major, "grad_year": s.grad_year,
                  "interests": s.interests, "goals": s.goals, "embedding": vectors[s.slug],
-                 "model": embedder.model},
+                 "model": embedding_tag(embedder.model)},
             )
             for code in s.courses:
                 await conn.execute(

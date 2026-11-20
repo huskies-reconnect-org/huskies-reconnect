@@ -1,8 +1,9 @@
+from typing import Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from psycopg import AsyncConnection
-from psycopg.rows import class_row
+from psycopg.rows import dict_row
 from pydantic import BaseModel
 
 from app.config import get_settings
@@ -20,13 +21,14 @@ class Match(BaseModel):
     interests: str | None
     goals: str | None
     similarity: float
+    strength: Literal["strong", "good", "possible"]
     is_demo: bool
 
 
 # Operator is schema-qualified so this works whatever the search_path is.
 _MATCHES_SQL = """
     with me as (
-        select u.embedding, m.status
+        select u.embedding, u.embedding_model, m.status
           from public.users u
           join public.course_members m on m.user_id = u.id and m.course_id = %(course)s
          where u.id = %(me)s)
@@ -39,6 +41,7 @@ _MATCHES_SQL = """
        and m.status = me.status  -- same cohort: current students, or alumni after the semester ends
        and u.id <> %(me)s
        and u.embedding is not null
+       and u.embedding_model = me.embedding_model  -- vectors from different models/formats aren't comparable
        and 1 - (u.embedding OPERATOR(extensions.<=>) me.embedding) >= %(min_similarity)s
      order by u.embedding OPERATOR(extensions.<=>) me.embedding, u.id
      limit %(limit)s
@@ -69,11 +72,22 @@ async def course_matches(
     if not has_embedding:
         raise HTTPException(status.HTTP_409_CONFLICT, "Complete your profile to see matches")
 
-    async with conn.cursor(row_factory=class_row(Match)) as cur:
+    settings = get_settings()
+    async with conn.cursor(row_factory=dict_row) as cur:
         await cur.execute(_MATCHES_SQL, {
             "me": user_id,
             "course": course_id,
-            "min_similarity": get_settings().match_min_similarity,
+            "min_similarity": settings.match_min_similarity,
             "limit": limit,
         })
-        return await cur.fetchall()
+        rows = await cur.fetchall()
+    return [Match(**r, strength=strength(r["similarity"])) for r in rows]
+
+
+def strength(similarity: float) -> Literal["strong", "good", "possible"]:
+    s = get_settings()
+    if similarity >= s.match_strong_similarity:
+        return "strong"
+    if similarity >= s.match_good_similarity:
+        return "good"
+    return "possible"

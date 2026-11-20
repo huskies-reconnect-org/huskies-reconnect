@@ -1,4 +1,5 @@
 """Icebreaker drafting with Gemini (Interactions API, plain REST over httpx)."""
+import asyncio
 import json
 from dataclasses import dataclass
 from typing import Protocol
@@ -6,6 +7,7 @@ from typing import Protocol
 import httpx
 
 from app.config import get_settings
+from app.embeddings import MAX_ATTEMPTS, RETRY_DELAY_S, RETRY_STATUS
 
 _URL = "https://generativelanguage.googleapis.com/v1beta/interactions"
 _API_REVISION = "2026-05-20"
@@ -100,14 +102,17 @@ class GeminiGenerator:
 
         client = self._client or httpx.AsyncClient(timeout=30)
         try:
-            for attempt in range(2):  # one retry on rate limit / server error
+            for attempt in range(MAX_ATTEMPTS):
+                last = attempt == MAX_ATTEMPTS - 1
+                if attempt:
+                    await asyncio.sleep(RETRY_DELAY_S * attempt)
                 try:
                     r = await client.post(_URL, json=payload, headers=headers)
                 except httpx.HTTPError as e:
-                    if attempt == 0:
+                    if not last:
                         continue
                     raise GenerationError(f"Gemini request failed: {type(e).__name__}") from e
-                if r.status_code in (429, 500, 502, 503, 504) and attempt == 0:
+                if r.status_code in RETRY_STATUS and not last:
                     continue
                 if r.status_code == 400:
                     code = (_safe_json(r).get("error") or {}).get("code")

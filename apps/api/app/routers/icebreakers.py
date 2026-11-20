@@ -48,6 +48,7 @@ _PAIR_SQL = """
            them.full_name as them_name, them.major as them_major,
            them.interests as them_interests, them.goals as them_goals,
            case when me.embedding is not null and them.embedding is not null
+                     and me.embedding_model = them.embedding_model
                 then 1 - (me.embedding OPERATOR(extensions.<=>) them.embedding) end as similarity
       from public.courses c
       join public.users me on me.id = %(me)s

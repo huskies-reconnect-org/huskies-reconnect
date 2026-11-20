@@ -74,6 +74,7 @@ export type Match = {
   interests: string | null;
   goals: string | null;
   similarity: number;
+  strength: "strong" | "good" | "possible";
   is_demo: boolean;
 };
 

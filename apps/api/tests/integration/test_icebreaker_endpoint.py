@@ -49,7 +49,7 @@ def setup(db, make_user):
     def student(name, embedding, course_id=course):
         uid = make_user(name)
         db.execute("""update public.users set full_name = %s, major = 'CS', interests = 'NLP', goals = 'study',
-                      embedding = %s::extensions.vector where id = %s""", (name, embedding, uid))
+                      embedding = %s::extensions.vector, embedding_model = 'test#ig1' where id = %s""", (name, embedding, uid))
         if course_id:
             db.execute("insert into public.course_members (user_id, course_id) values (%s, %s)", (uid, course_id))
         return uid

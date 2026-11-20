@@ -18,8 +18,11 @@ class Settings(BaseSettings):
     gemini_text_model: str = "gemini-3.5-flash-lite"
 
     # Cosine similarity a classmate must reach to count as a match (README's
-    # "relevance bar"). Tune once real profiles exist.
-    match_min_similarity: float = 0.5
+    # "relevance bar"), and the bands shown to students. Tuned on real Gemini
+    # vectors (Nov 2026): unrelated profiles peaked at ~0.82, clear matches 0.89-0.96.
+    match_min_similarity: float = 0.82
+    match_good_similarity: float = 0.85
+    match_strong_similarity: float = 0.88
 
     # Comma-separated emails allowed to run demo admin actions (simulate semester end).
     admin_emails: str = ""

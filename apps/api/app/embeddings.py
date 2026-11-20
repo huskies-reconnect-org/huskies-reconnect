@@ -4,6 +4,7 @@ gemini-embedding-2 takes the task as a text prefix (no task_type field). We use
 the symmetric "sentence similarity" task because we compare profile to profile.
 Vectors are re-normalized here so cosine distance is right regardless of model.
 """
+import asyncio
 import math
 from typing import Protocol
 
@@ -13,6 +14,23 @@ from app.config import get_settings
 
 EMBED_DIM = 768
 _BASE = "https://generativelanguage.googleapis.com/v1beta/models"
+
+# Bump when profile_text() changes: vectors from different formats aren't comparable.
+# "ig1" = interests + goals as plain sentences. Measured on Gemini (Nov 2026), labeled
+# text with the major ("Major: ...\nInterests: ...") squeezed every pair into 0.87-0.98;
+# this format spreads them to ~0.75-0.96 and separates unrelated profiles better.
+EMBED_FORMAT = "ig1"
+
+# Gemini intermittently returns 403 PERMISSION_DENIED for valid keys (~2 in 30 calls in
+# testing; the next call succeeds), so 403 is retried along with the usual transient codes.
+RETRY_STATUS = {403, 429, 500, 502, 503, 504}
+MAX_ATTEMPTS = 3
+RETRY_DELAY_S = 0.5
+
+
+def embedding_tag(model: str) -> str:
+    """Stored in users.embedding_model; only embeddings with equal tags are compared."""
+    return f"{model}#{EMBED_FORMAT}"
 
 
 class EmbeddingError(Exception):
@@ -25,13 +43,9 @@ class Embedder(Protocol):
     async def embed(self, text: str) -> list[float]: ...
 
 
-def profile_text(major: str | None, interests: str | None, goals: str | None) -> str:
-    parts = [
-        f"Major: {major.strip()}" if major else "",
-        f"Interests: {interests.strip()}" if interests else "",
-        f"Goals: {goals.strip()}" if goals else "",
-    ]
-    return "\n".join(p for p in parts if p)
+def profile_text(interests: str | None, goals: str | None) -> str:
+    parts = [p.strip().rstrip(".") for p in (interests, goals) if p and p.strip()]
+    return ". ".join(parts) + ("." if parts else "")
 
 
 def normalize(values: list[float]) -> list[float]:
@@ -70,14 +84,17 @@ class GeminiEmbedder:
 
         client = self._client or httpx.AsyncClient(timeout=15)
         try:
-            for attempt in range(2):  # one retry on rate limit / server error
+            for attempt in range(MAX_ATTEMPTS):
+                last = attempt == MAX_ATTEMPTS - 1
+                if attempt:
+                    await asyncio.sleep(RETRY_DELAY_S * attempt)
                 try:
                     r = await client.post(url, json=payload, headers=headers)
                 except httpx.HTTPError as e:
-                    if attempt == 0:
+                    if not last:
                         continue
                     raise EmbeddingError(f"Gemini request failed: {type(e).__name__}") from e
-                if r.status_code in (429, 500, 502, 503, 504) and attempt == 0:
+                if r.status_code in RETRY_STATUS and not last:
                     continue
                 if r.status_code != 200:
                     raise EmbeddingError(f"Gemini returned {r.status_code}")

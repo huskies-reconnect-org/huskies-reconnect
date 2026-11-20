@@ -30,7 +30,7 @@ def world(db, make_user):
     def student(name, embedding):
         uid = make_user(name)
         db.execute("""update public.users set full_name = %s, major = 'CS', interests = 'NLP', goals = 'study',
-                      embedding = %s::extensions.vector where id = %s""", (name, embedding, uid))
+                      embedding = %s::extensions.vector, embedding_model = 'test#ig1' where id = %s""", (name, embedding, uid))
         db.execute("insert into public.course_members (user_id, course_id) values (%s, %s)", (uid, course))
         return uid
     me, bob = student("Alice", vec(1, 0)), student("Bob", vec(1, 0.1))
