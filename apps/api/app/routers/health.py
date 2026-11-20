@@ -1,5 +1,7 @@
 import asyncio
 
+import httpx
+
 from fastapi import APIRouter, Response, status
 from starlette.concurrency import run_in_threadpool
 
@@ -39,12 +41,27 @@ async def _check_auth_keys() -> str:
         return "error"
 
 
+async def _check_gemini() -> str:
+    """Validates the key by listing one model: no generation, no quota spent on content."""
+    key = get_settings().gemini_api_key
+    if not key:
+        return "not_configured"
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            r = await client.get("https://generativelanguage.googleapis.com/v1beta/models",
+                                 params={"pageSize": 1}, headers={"x-goog-api-key": key})
+        return "ok" if r.status_code == 200 else "error"
+    except httpx.HTTPError:
+        return "error"
+
+
 @router.get("/health/ready")
 async def ready(response: Response) -> dict:
-    """Readiness: can the API reach Postgres and Supabase's signing keys?
+    """Readiness: can the API reach Postgres, Supabase's signing keys and Gemini?
     Reports only ok / error / not_configured, never config values."""
-    database, auth_keys = await asyncio.gather(_check_database(), _check_auth_keys())
-    checks = {"database": database, "auth_keys": auth_keys}
+    database, auth_keys, gemini = await asyncio.gather(
+        _check_database(), _check_auth_keys(), _check_gemini())
+    checks = {"database": database, "auth_keys": auth_keys, "gemini": gemini}
     ok = all(v == "ok" for v in checks.values())
     if not ok:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE

@@ -24,7 +24,7 @@ They rebuild the schema from `schema/supabase/migrations/` on every run.
 | Method | Path | Auth | What |
 |---|---|---|---|
 | GET | `/health` | no | Liveness (Render health check) |
-| GET | `/health/ready` | no | Can reach Postgres and Supabase signing keys |
+| GET | `/health/ready` | no | Can reach Postgres, Supabase signing keys and Gemini (ok / error / not_configured) |
 | GET | `/me` | yes | Current user's profile row |
 | GET | `/courses` | yes | Course list with member counts and `joined` |
 | POST | `/courses/{id}/join` | yes | Join a course (idempotent) |
