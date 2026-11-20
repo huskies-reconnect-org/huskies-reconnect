@@ -92,6 +92,7 @@ export type Database = {
           grad_year: number | null
           id: string
           interests: string | null
+          is_demo: boolean
           major: string | null
         }
         Insert: {
@@ -105,6 +106,7 @@ export type Database = {
           grad_year?: number | null
           id: string
           interests?: string | null
+          is_demo?: boolean
           major?: string | null
         }
         Update: {
@@ -118,6 +120,7 @@ export type Database = {
           grad_year?: number | null
           id?: string
           interests?: string | null
+          is_demo?: boolean
           major?: string | null
         }
         Relationships: []

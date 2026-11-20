@@ -15,7 +15,7 @@ Simplified or preloaded pieces are fine where they don't weaken that flow. Progr
 2. [x] **Course join:** list + join endpoints, one page with Join buttons, preloaded course list
 3. [x] **Profile + embeddings:** *(live Gemini check pending API key)* form (major, interests, goals), embedding via Gemini API stored in pgvector
 4. [x] **Matching page:** pgvector similarity among classmates in the same course
-5. [ ] **Demo classmates:** ~8 seeded students with realistic profiles (`is_demo` flag)
+5. [x] **Demo classmates:** *(seed run pending API key)* ~8 seeded students with realistic profiles (`is_demo` flag)
 6. [ ] **Icebreaker:** "Draft intro" button → Gemini → safety check → shown on screen
 7. [ ] **Stretch, only if time allows:** "Simulate semester end" button (course becomes an alumni group)
 8. [ ] **Rehearsal:** full pass on the deployed site, bug fixes, demo script
