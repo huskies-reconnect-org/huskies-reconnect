@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { api, ApiError, type Course, type Match } from "@/lib/api";
+import { api, ApiError, type Course, type Match, type Me } from "@/lib/api";
 import { useRequireSession } from "@/lib/useSession";
 import { MatchCard } from "@/components/MatchCard";
 
@@ -19,9 +19,30 @@ export default function CourseMatchesPage() {
   const session = useRequireSession();
   const [course, setCourse] = useState<Course | null>(null);
   const [state, setState] = useState<State>({ kind: "loading" });
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminBusy, setAdminBusy] = useState(false);
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
     if (!session) return;
+    api<Me>("/me").then((me) => setIsAdmin(me.is_admin)).catch(() => {});
+  }, [session]);
+
+  async function changeSemester(action: "end" | "reset") {
+    setAdminBusy(true);
+    try {
+      await api(`/courses/${id}/semester`, { method: "POST", body: JSON.stringify({ action }) });
+      setReload((n) => n + 1);
+    } catch (e) {
+      setState({ kind: "error", message: (e as Error).message });
+    } finally {
+      setAdminBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!session) return;
+    setState({ kind: "loading" });
     api<Course[]>("/courses")
       .then((cs) => setCourse(cs.find((c) => c.id === id) ?? null))
       .catch(() => {});
@@ -32,7 +53,7 @@ export default function CourseMatchesPage() {
         else if (e instanceof ApiError && e.status === 403) setState({ kind: "not-member" });
         else setState({ kind: "error", message: e.message });
       });
-  }, [session, id]);
+  }, [session, id, reload]);
 
   if (!session) return null;
 
@@ -45,6 +66,26 @@ export default function CourseMatchesPage() {
         <Link href="/courses" className="text-sm underline">All courses</Link>
       </header>
       {course && <p className="-mt-4 text-sm text-gray-600">{course.title}</p>}
+
+      {course?.membership === "alumni" && (
+        <p className="rounded border border-purple-300 bg-purple-50 p-3 text-sm">
+          The semester has ended. This is now your <strong>{course.code} alumni group</strong>: the classmates
+          you shared it with, ready when you want to reconnect.
+        </p>
+      )}
+
+      {isAdmin && course?.joined && (
+        <div className="flex items-center gap-2 rounded border border-dashed p-3 text-sm">
+          <span className="text-gray-600">Demo controls:</span>
+          {course.membership === "alumni" ? (
+            <button disabled={adminBusy} onClick={() => changeSemester("reset")}
+              className="rounded border px-3 py-1 disabled:opacity-50">Undo semester end</button>
+          ) : (
+            <button disabled={adminBusy} onClick={() => changeSemester("end")}
+              className="rounded bg-purple-700 px-3 py-1 text-white disabled:opacity-50">Simulate semester end</button>
+          )}
+        </div>
+      )}
 
       {state.kind === "loading" && <p className="text-sm">Finding classmates…</p>}
 
@@ -70,7 +111,7 @@ export default function CourseMatchesPage() {
 
       {state.kind === "ready" && state.matches.length > 0 && (
         <ul className="flex flex-col gap-3">
-          {state.matches.map((m) => <MatchCard key={m.user_id} courseId={id} match={m} />)}
+          {state.matches.map((m) => <MatchCard key={`${m.user_id}-${course?.membership}`} courseId={id} match={m} />)}
         </ul>
       )}
     </main>

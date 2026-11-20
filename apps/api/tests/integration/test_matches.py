@@ -98,10 +98,14 @@ def test_non_member_is_403(client, student, course, other_course):
     assert client.get(f"/courses/{course}/matches").status_code == 403
 
 
-def test_alumni_member_is_403(client, student, course):
+def test_alumni_see_alumni_not_current_students(client, student, course):
     me = student("me", vec(1, 0), course, status="alumni")
+    former = student("former", vec(1, 0.1), course, status="alumni")
+    student("current", vec(1, 0.1), course)
     client.login(me)
-    assert client.get(f"/courses/{course}/matches").status_code == 403
+    r = client.get(f"/courses/{course}/matches")
+    assert r.status_code == 200
+    assert [m["user_id"] for m in r.json()] == [former]
 
 
 def test_no_profile_embedding_is_409(client, make_user, db, course):

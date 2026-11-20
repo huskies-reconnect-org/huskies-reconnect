@@ -54,8 +54,10 @@ export default function CoursesPage() {
               </p>
             </div>
             {c.joined ? (
-              <Link href={`/courses/${c.id}`} className="rounded bg-green-100 px-3 py-1 text-sm text-green-800">
-                See classmates →
+              <Link href={`/courses/${c.id}`}
+                className={`rounded px-3 py-1 text-sm ${c.membership === "alumni"
+                  ? "bg-purple-100 text-purple-800" : "bg-green-100 text-green-800"}`}>
+                {c.membership === "alumni" ? "Alumni group →" : "See classmates →"}
               </Link>
             ) : (
               <button

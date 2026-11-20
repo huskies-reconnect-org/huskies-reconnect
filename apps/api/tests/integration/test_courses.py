@@ -22,11 +22,13 @@ def test_join_marks_joined_and_counts(client, make_user):
     r = client.post(f"/courses/{cid}/join")
     assert r.status_code == 200
     assert r.json()["joined"] is True and r.json()["member_count"] == 1
+    assert r.json()["membership"] == "active"
 
     client.login(bob)
     listed = {c["code"]: c for c in client.get("/courses").json()}
     assert listed["CS5100"]["member_count"] == 1
     assert listed["CS5100"]["joined"] is False  # joined is per-user
+    assert listed["CS5100"]["membership"] is None
 
 
 def test_join_is_idempotent(client, make_user, db):

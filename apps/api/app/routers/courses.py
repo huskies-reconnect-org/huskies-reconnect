@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -21,15 +22,18 @@ class Course(BaseModel):
     ends_on: date
     member_count: int
     joined: bool
+    membership: Literal["active", "alumni"] | None
 
 
 # The API connects as postgres (RLS bypassed), so every query scopes to user_id itself.
 _COURSE_SELECT = """
     select c.id, c.code, c.title, c.term, c.section, c.ends_on,
            (select count(*) from public.course_members m
-             where m.course_id = c.id and m.status = 'active')::int as member_count,
+             where m.course_id = c.id)::int as member_count,
            exists (select 1 from public.course_members m
-                    where m.course_id = c.id and m.user_id = %(user_id)s) as joined
+                    where m.course_id = c.id and m.user_id = %(user_id)s) as joined,
+           (select m.status from public.course_members m
+             where m.course_id = c.id and m.user_id = %(user_id)s) as membership
       from public.courses c
 """
 

@@ -40,6 +40,7 @@ export type Course = {
   ends_on: string;
   member_count: number;
   joined: boolean;
+  membership: "active" | "alumni" | null;
 };
 
 export type Me = {
@@ -52,6 +53,7 @@ export type Me = {
   goals: string | null;
   profile_complete: boolean;
   matchable: boolean;
+  is_admin: boolean;
 };
 
 export type ProfileIn = {

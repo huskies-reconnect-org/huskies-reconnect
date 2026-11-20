@@ -24,8 +24,9 @@ class FakeGenerator:
         self.outputs: list = [GOOD]
         self.calls = []
 
-    async def draft(self, sender, classmate, course):
+    async def draft(self, sender, classmate, course, reconnecting=False):
         self.calls.append((sender, classmate, course))
+        self.reconnecting = reconnecting
         out = self.outputs.pop(0) if len(self.outputs) > 1 else self.outputs[0]
         if isinstance(out, Exception):
             raise out

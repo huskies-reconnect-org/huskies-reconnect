@@ -21,6 +21,13 @@ class Settings(BaseSettings):
     # "relevance bar"). Tune once real profiles exist.
     match_min_similarity: float = 0.5
 
+    # Comma-separated emails allowed to run demo admin actions (simulate semester end).
+    admin_emails: str = ""
+
+    def is_admin(self, email: str | None) -> bool:
+        allowed = {e.strip().lower() for e in self.admin_emails.split(",") if e.strip()}
+        return bool(email) and email.lower() in allowed
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

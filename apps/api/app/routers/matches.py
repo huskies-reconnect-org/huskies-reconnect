@@ -25,14 +25,18 @@ class Match(BaseModel):
 
 # Operator is schema-qualified so this works whatever the search_path is.
 _MATCHES_SQL = """
-    with me as (select embedding from public.users where id = %(me)s)
+    with me as (
+        select u.embedding, m.status
+          from public.users u
+          join public.course_members m on m.user_id = u.id and m.course_id = %(course)s
+         where u.id = %(me)s)
     select u.id as user_id, u.full_name, u.major, u.grad_year, u.interests, u.goals, u.is_demo,
            1 - (u.embedding OPERATOR(extensions.<=>) me.embedding) as similarity
       from public.course_members m
       join public.users u on u.id = m.user_id
       cross join me
      where m.course_id = %(course)s
-       and m.status = 'active'
+       and m.status = me.status  -- same cohort: current students, or alumni after the semester ends
        and u.id <> %(me)s
        and u.embedding is not null
        and 1 - (u.embedding OPERATOR(extensions.<=>) me.embedding) >= %(min_similarity)s
@@ -52,7 +56,7 @@ async def course_matches(
     row = await (await conn.execute(
         """select exists (select 1 from public.courses where id = %(course)s),
                   exists (select 1 from public.course_members
-                           where course_id = %(course)s and user_id = %(me)s and status = 'active'),
+                           where course_id = %(course)s and user_id = %(me)s),
                   (select embedding is not null from public.users where id = %(me)s)""",
         {"course": course_id, "me": user_id},
     )).fetchone()

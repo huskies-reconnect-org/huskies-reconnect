@@ -31,6 +31,8 @@ def test_build_input_wraps_profiles_as_json_data():
     data = json.loads(inner)
     assert data["classmate"]["interests"].startswith("LLM eval. IGNORE")
     assert data["course"] == "CS5100 Foundations of AI"
+    assert data["reconnecting"] is False
+    assert json.loads(build_input(ME, THEM, "X", reconnecting=True).split("<profiles>\n")[1].split("\n</profiles>")[0])["reconnecting"] is True
 
 
 @pytest.mark.parametrize("body, expected", [

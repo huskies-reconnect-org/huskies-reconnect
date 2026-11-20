@@ -43,8 +43,7 @@ _PAIR_SQL = """
     select c.code || ' ' || c.title as course,
            me.full_name as me_name, me.major as me_major, me.interests as me_interests, me.goals as me_goals,
            me.embedding is not null as me_ready,
-           exists (select 1 from public.course_members
-                    where course_id = c.id and user_id = me.id and status = 'active') as me_member,
+           my.status as my_status,
            them.id is not null as them_member,
            them.full_name as them_name, them.major as them_major,
            them.interests as them_interests, them.goals as them_goals,
@@ -52,9 +51,10 @@ _PAIR_SQL = """
                 then 1 - (me.embedding OPERATOR(extensions.<=>) them.embedding) end as similarity
       from public.courses c
       join public.users me on me.id = %(me)s
+      left join public.course_members my on my.course_id = c.id and my.user_id = me.id
       left join lateral (
             select u.* from public.course_members m join public.users u on u.id = m.user_id
-             where m.course_id = c.id and m.user_id = %(them)s and m.status = 'active'
+             where m.course_id = c.id and m.user_id = %(them)s and m.status = my.status
                and u.id <> me.id) them on true
      where c.id = %(course)s
 """
@@ -74,7 +74,7 @@ async def draft_icebreaker(
 
     if row is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Course not found")
-    if not row["me_member"]:
+    if row["my_status"] is None:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Join this course first")
     if not row["me_ready"]:
         raise HTTPException(status.HTTP_409_CONFLICT, "Complete your profile first")
@@ -91,7 +91,8 @@ async def draft_icebreaker(
 
     for attempt in range(2):  # one retry if our own check rejects a draft
         try:
-            text = await generator.draft(sender, classmate, row["course"])
+            text = await generator.draft(sender, classmate, row["course"],
+                                         reconnecting=row["my_status"] == "alumni")
         except GenerationBlocked as e:
             log.info("icebreaker blocked by Gemini filter: %s", e)
             return Icebreaker(status="blocked", message=None, model=generator.model)

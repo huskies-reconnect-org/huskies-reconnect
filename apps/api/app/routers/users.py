@@ -6,6 +6,7 @@ from psycopg import AsyncConnection
 from psycopg.rows import dict_row
 from pydantic import BaseModel, Field, StringConstraints
 
+from app.config import get_settings
 from app.db import get_conn
 from app.deps import get_current_user_id
 from app.embeddings import Embedder, EmbeddingError, get_embedder, profile_text, to_pgvector
@@ -30,11 +31,12 @@ class Me(BaseModel):
     goals: str | None
     profile_complete: bool
     matchable: bool  # has an embedding, so can appear in matches
+    is_admin: bool
 
 
 def _to_me(row: dict) -> Me:
     complete = all(row.get(k) for k in ("full_name", "major", "interests", "goals"))
-    return Me(**row, profile_complete=complete)
+    return Me(**row, profile_complete=complete, is_admin=get_settings().is_admin(row.get("email")))
 
 
 async def _load_me(conn: AsyncConnection, user_id: str) -> dict:
