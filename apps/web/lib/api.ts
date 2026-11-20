@@ -41,3 +41,25 @@ export type Course = {
   member_count: number;
   joined: boolean;
 };
+
+export type Me = {
+  id: string;
+  email: string;
+  full_name: string | null;
+  major: string | null;
+  grad_year: number | null;
+  interests: string | null;
+  goals: string | null;
+  profile_complete: boolean;
+  matchable: boolean;
+};
+
+export type ProfileIn = {
+  full_name: string;
+  major: string;
+  grad_year: number | null;
+  interests: string;
+  goals: string;
+};
+
+export type ProfileOut = Me & { embedding_status: "updated" | "unchanged" | "failed" };

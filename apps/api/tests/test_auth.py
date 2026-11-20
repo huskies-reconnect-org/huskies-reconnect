@@ -36,7 +36,7 @@ def make_token(key=_private, **overrides):
 
 class _FakeCursor:
     def __init__(self, row):
-        self.row, self.factory = row, None
+        self.row = row
 
     async def __aenter__(self):
         return self
@@ -48,7 +48,7 @@ class _FakeCursor:
         pass
 
     async def fetchone(self):
-        return None if self.row is None else self.factory(**self.row)
+        return self.row
 
 
 @pytest.fixture
@@ -59,13 +59,9 @@ def client(monkeypatch):
 
 
 def _use_db_row(row):
-    from app.routers.users import Me
-
     class Conn:
         def cursor(self, row_factory):
-            cur = _FakeCursor(row)
-            cur.factory = Me
-            return cur
+            return _FakeCursor(row)
 
     async def fake_conn():
         yield Conn()
@@ -79,7 +75,8 @@ def auth(token):
 
 def test_valid_token_returns_profile(client):
     _use_db_row({"id": USER_ID, "email": "alice@northeastern.edu",
-                 "full_name": "Alice", "major": None, "grad_year": None})
+                 "full_name": "Alice", "major": None, "grad_year": None,
+                 "interests": None, "goals": None, "matchable": False})
     r = client.get("/me", headers=auth(make_token()))
     assert r.status_code == 200
     assert r.json()["id"] == USER_ID

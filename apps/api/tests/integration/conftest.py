@@ -4,7 +4,6 @@ Skipped unless TEST_DATABASE_URL is set (see scripts/test-db.sh). The database i
 wiped and rebuilt each session, so never point this at the Supabase project.
 """
 import os
-import re
 import uuid
 from pathlib import Path
 
@@ -15,6 +14,7 @@ from psycopg import AsyncConnection
 
 from app.db import get_conn
 from app.deps import get_current_user_id
+from app.embeddings import get_embedder
 from app.main import app
 
 URL = os.environ.get("TEST_DATABASE_URL", "")
@@ -46,10 +46,6 @@ create function auth.uid() returns uuid language sql stable as
 
 def _adapt(sql: str, conn: psycopg.Connection) -> str:
     """Make migrations runnable on a plain local Postgres."""
-    has_vector = conn.execute(
-        "select 1 from pg_available_extensions where name = 'vector'").fetchone()
-    if not has_vector:
-        sql = re.sub(r"(?im)^create extension if not exists vector.*$", "-- vector unavailable", sql)
     if conn.info.server_version < 150000:
         sql = sql.replace("unique nulls not distinct", "unique")
     return sql
@@ -60,6 +56,8 @@ def migrated_db():
     if not URL:
         pytest.skip("TEST_DATABASE_URL not set")
     with psycopg.connect(URL, autocommit=True) as conn:
+        if not conn.execute("select 1 from pg_available_extensions where name = 'vector'").fetchone():
+            pytest.skip("pgvector not installed in the test database (CI has it)")
         conn.execute(SUPABASE_STUBS)
         for f in sorted(MIGRATIONS.glob("*.sql")):
             conn.execute(_adapt(f.read_text(), conn))
@@ -86,14 +84,37 @@ def make_user(db):
     return _make
 
 
+class FakeEmbedder:
+    """Deterministic stand-in for Gemini: same text -> same unit vector."""
+    model = "fake-embedding"
+
+    def __init__(self):
+        self.calls = 0
+        self.fail = False
+
+    async def embed(self, text: str) -> list[float]:
+        from app.embeddings import EMBED_DIM, EmbeddingError, normalize
+        self.calls += 1
+        if self.fail:
+            raise EmbeddingError("simulated outage")
+        seed = sum(map(ord, text)) or 1
+        return normalize([((seed * (i + 1)) % 97) + 1.0 for i in range(EMBED_DIM)])
+
+
 @pytest.fixture
-def client(migrated_db):
+def embedder():
+    return FakeEmbedder()
+
+
+@pytest.fixture
+def client(migrated_db, embedder):
     """App client whose DB is the test database; log in with client.login(user_id)."""
     async def test_conn():
         async with await AsyncConnection.connect(migrated_db) as conn:
             yield conn
 
     app.dependency_overrides[get_conn] = test_conn
+    app.dependency_overrides[get_embedder] = lambda: embedder
     c = TestClient(app)
 
     def login(user_id: str):

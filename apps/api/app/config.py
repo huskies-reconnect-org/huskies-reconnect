@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000"
     allowed_email_domain: str = "northeastern.edu"
 
+    gemini_api_key: str = ""
+    gemini_embed_model: str = "gemini-embedding-2"
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
