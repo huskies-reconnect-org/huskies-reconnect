@@ -28,4 +28,5 @@ They rebuild the schema from `schema/supabase/migrations/` on every run.
 | GET | `/me` | yes | Current user's profile row |
 | GET | `/courses` | yes | Course list with member counts and `joined` |
 | POST | `/courses/{id}/join` | yes | Join a course (idempotent) |
+| GET | `/courses/{id}/matches` | yes | Classmates ranked by profile similarity (members only, above `MATCH_MIN_SIMILARITY`) |
 | PUT | `/me/profile` | yes | Save profile; re-embeds via Gemini when major/interests/goals change |

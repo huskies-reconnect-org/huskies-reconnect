@@ -63,3 +63,13 @@ export type ProfileIn = {
 };
 
 export type ProfileOut = Me & { embedding_status: "updated" | "unchanged" | "failed" };
+
+export type Match = {
+  user_id: string;
+  full_name: string | null;
+  major: string | null;
+  grad_year: number | null;
+  interests: string | null;
+  goals: string | null;
+  similarity: number;
+};

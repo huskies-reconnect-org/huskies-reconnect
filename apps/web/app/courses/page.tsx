@@ -54,7 +54,9 @@ export default function CoursesPage() {
               </p>
             </div>
             {c.joined ? (
-              <span className="rounded bg-green-100 px-3 py-1 text-sm text-green-800">Joined</span>
+              <Link href={`/courses/${c.id}`} className="rounded bg-green-100 px-3 py-1 text-sm text-green-800">
+                See classmates →
+              </Link>
             ) : (
               <button
                 onClick={() => join(c.id)}

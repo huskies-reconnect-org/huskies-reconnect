@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app import db
 from app.config import get_settings
-from app.routers import courses, health, users
+from app.routers import courses, health, matches, users
 
 settings = get_settings()
 
@@ -33,3 +33,4 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(users.router)
 app.include_router(courses.router)
+app.include_router(matches.router)

@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     gemini_embed_model: str = "gemini-embedding-2"
 
+    # Cosine similarity a classmate must reach to count as a match (README's
+    # "relevance bar"). Tune once real profiles exist.
+    match_min_similarity: float = 0.5
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
