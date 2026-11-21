@@ -11,6 +11,28 @@ def test_good_intro_passes():
     assert check_intro(GOOD).ok
 
 
+@pytest.mark.parametrize("text", [
+    "Hi Aisha! I loved your take on language model safety in CS5100. Coffee sometime?",
+    "Hey Maya, we both work on evaluating a large language model for class. Want to compare notes?",
+    "Hi Ethan! I cannot wait to see your AR project. Coffee after Thursday's lecture?",
+])
+def test_talking_about_language_models_passes(text):
+    assert check_intro(text).ok
+
+
+@pytest.mark.parametrize("text", [
+    "As an AI language model, I suggest you meet up.",
+    "As a language model I can't know your schedule, but want to study?",
+    "I am an AI, but here's a message: want to study?",
+    "I'm a large language model. Hi Bob!",
+    "I cannot help with writing messages to other students.",
+    "I'm sorry, but I can't write that.",
+])
+def test_model_talking_about_itself_is_rejected(text):
+    r = check_intro(text)
+    assert not r.ok and r.reason == "meta"
+
+
 def test_names_that_contain_blocked_substrings_pass():
     assert check_intro("Hi Dickinson! Want to study for CS5100 together this week? I love Pissarro too.").ok
 

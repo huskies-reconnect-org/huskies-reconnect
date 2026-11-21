@@ -15,7 +15,12 @@ _URL = re.compile(r"(https?://|www\.|\b[\w-]+\.(com|net|org|io|ai|co|ly|me|app|d
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 _PHONE = re.compile(r"(\+?\d[\s().-]?){7,}")
 _PLACEHOLDER = re.compile(r"\[[^\]]{1,40}\]|\{[^}]{1,40}\}|<[^>]{1,40}>")
-_META = re.compile(r"\b(as an ai|language model|i cannot|i can't help|i'm sorry, but)\b", re.I)
+# Only the model talking about itself. Topics like "language model safety" are common in
+# student profiles and must pass.
+_META = re.compile(
+    r"\b(as an ai\b|as a(n ai)? (large )?language model|i('m| am) (just )?(an ai|a (large )?language model)"
+    r"|i (cannot|can't|am unable to|'m unable to) (help|assist|provide|create|write|generate|fulfill)"
+    r"|i'm sorry, but)", re.I)
 _PROFANITY = re.compile(
     r"\b(fuck\w*|shit\w*|bitch\w*|bastard\w*|asshole\w*|dicks?|crap|crappy|damn\w*|piss(ed|ing)?|slut\w*|whore\w*)\b", re.I)
 
