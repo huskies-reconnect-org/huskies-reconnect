@@ -45,6 +45,24 @@ class GenerationError(Exception):
     pass
 
 
+class GenerationRateLimited(GenerationError):
+    """Gemini quota hit (free tier: 15 requests/min for flash-lite)."""
+
+    def __init__(self, retry_after: int | None):
+        super().__init__(f"rate limited, retry after {retry_after}s")
+        self.retry_after = retry_after
+
+
+MAX_RATE_LIMIT_WAIT_S = 5  # wait inline only for short Retry-After values
+
+
+def _retry_after(r: httpx.Response) -> int | None:
+    try:
+        return max(0, int(float(r.headers.get("retry-after", ""))))
+    except ValueError:
+        return None
+
+
 class GenerationBlocked(Exception):
     """Gemini's safety filters refused the request or response."""
 
@@ -104,16 +122,29 @@ class GeminiGenerator:
 
         client = self._client or httpx.AsyncClient(timeout=30)
         try:
+            waited = False
             for attempt in range(MAX_ATTEMPTS):
                 last = attempt == MAX_ATTEMPTS - 1
-                if attempt:
+                if attempt and not waited:
                     await asyncio.sleep(RETRY_DELAY_S * attempt)
+                waited = False
                 try:
                     r = await client.post(_URL, json=payload, headers=headers)
                 except httpx.HTTPError as e:
                     if not last:
                         continue
                     raise GenerationError(f"Gemini request failed: {type(e).__name__}") from e
+                if r.status_code == 429:
+                    # Retrying fast against a per-minute quota just burns requests:
+                    # wait only when Gemini says it's brief, otherwise report the wait.
+                    wait = _retry_after(r)
+                    if not last and wait is not None and wait <= MAX_RATE_LIMIT_WAIT_S:
+                        await asyncio.sleep(wait)
+                        waited = True
+                        continue
+                    if wait is not None or last:
+                        raise GenerationRateLimited(wait)
+                    continue
                 if r.status_code in RETRY_STATUS and not last:
                     continue
                 if r.status_code == 400:
@@ -121,7 +152,9 @@ class GeminiGenerator:
                     if code in _BLOCK_CODES:
                         raise GenerationBlocked(code)
                 if r.status_code != 200:
-                    raise GenerationError(f"Gemini returned {r.status_code}")
+                    err = _safe_json(r).get("error") or {}
+                    detail = err.get("status") or err.get("code") or ""
+                    raise GenerationError(f"Gemini returned {r.status_code} {detail}".strip())
                 body = _safe_json(r)
                 if body.get("status") not in (None, "completed"):
                     raise GenerationError(f"Gemini interaction {body.get('status')}")

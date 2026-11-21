@@ -4,7 +4,7 @@ import uuid
 import pytest
 
 from app.embeddings import EMBED_DIM, to_pgvector
-from app.icebreakers import GenerationBlocked, GenerationError, get_generator
+from app.icebreakers import GenerationBlocked, GenerationError, GenerationRateLimited, get_generator
 from app.main import app
 from app.routers import icebreakers as ib_router
 
@@ -157,3 +157,14 @@ def test_rate_limited(client, gen, setup):
     client.login(me)
     codes = [client.post(url(course, bob)).status_code for _ in range(11)]
     assert codes[:10] == [200] * 10 and codes[10] == 429
+
+
+def test_gemini_rate_limit_is_429_with_wait(client, gen, setup):
+    course, _, student = setup
+    me, bob = student("Alice", vec(1, 0)), student("Bob", vec(1, 0.1))
+    gen.outputs = [GenerationRateLimited(36)]
+    client.login(me)
+    r = client.post(url(course, bob))
+    assert r.status_code == 429
+    assert r.headers["retry-after"] == "36"
+    assert "36 seconds" in r.json()["detail"]

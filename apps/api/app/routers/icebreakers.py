@@ -12,7 +12,8 @@ from pydantic import BaseModel
 from app.config import get_settings
 from app.db import get_conn
 from app.deps import get_current_user_id
-from app.icebreakers import GenerationBlocked, GenerationError, Generator, Person, get_generator
+from app.icebreakers import (GenerationBlocked, GenerationError, GenerationRateLimited, Generator, Person,
+                             get_generator)
 from app.safety import check_intro
 
 log = logging.getLogger(__name__)
@@ -97,6 +98,12 @@ async def draft_icebreaker(
         except GenerationBlocked as e:
             log.info("icebreaker blocked by Gemini filter: %s", e)
             return Icebreaker(status="blocked", message=None, model=generator.model)
+        except GenerationRateLimited as e:
+            log.warning("icebreaker rate limited by Gemini: retry after %ss", e.retry_after)
+            wait = e.retry_after or 60
+            raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS,
+                                f"The AI is busy right now. Try again in {wait} seconds.",
+                                headers={"Retry-After": str(wait)})
         except GenerationError as e:
             log.warning("icebreaker generation failed: %s", e)
             raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Couldn't draft an intro right now")

@@ -97,7 +97,11 @@ class GeminiEmbedder:
                 if r.status_code in RETRY_STATUS and not last:
                     continue
                 if r.status_code != 200:
-                    raise EmbeddingError(f"Gemini returned {r.status_code}")
+                    try:
+                        err = r.json().get("error") or {}
+                    except ValueError:
+                        err = {}
+                    raise EmbeddingError(f"Gemini returned {r.status_code} {err.get('status', '')}".strip())
                 values = _extract_values(r.json())
                 if len(values) != EMBED_DIM:
                     raise EmbeddingError(f"Expected {EMBED_DIM} dims, got {len(values)}")

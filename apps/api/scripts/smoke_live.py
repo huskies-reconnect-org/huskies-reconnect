@@ -9,6 +9,7 @@ course membership statuses are restored to exactly what they were.
     python scripts/smoke_live.py --yes    # run (uses ~4 Gemini text calls)
 """
 import argparse
+import logging
 import sys
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -31,10 +32,28 @@ MATCH_CODE = "CS5100"
 failures: list[str] = []
 
 
+class _Recent(logging.Handler):
+    """Keeps the API's warnings so a failed check can show the underlying cause."""
+    def __init__(self):
+        super().__init__(logging.INFO)
+        self.lines: list[str] = []
+
+    def emit(self, record):
+        self.lines.append(f"{record.levelname} {record.name}: {record.getMessage()}")
+
+
+_log = _Recent()
+logging.getLogger("app").addHandler(_log)
+logging.getLogger("app").setLevel(logging.INFO)
+
+
 def check(cond: bool, label: str, detail: str = "") -> None:
     print(f"  {'PASS' if cond else 'FAIL'}  {label}{f'  ({detail})' if detail else ''}")
     if not cond:
         failures.append(label)
+        for line in _log.lines[-3:]:
+            print(f"        log: {line}")
+    _log.lines.clear()
 
 
 def main() -> int:

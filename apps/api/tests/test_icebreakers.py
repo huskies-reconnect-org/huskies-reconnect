@@ -3,7 +3,7 @@ import json
 import httpx
 import pytest
 
-from app.icebreakers import (GeminiGenerator, GenerationBlocked, GenerationError, Person,
+from app.icebreakers import (GeminiGenerator, GenerationBlocked, GenerationError, GenerationRateLimited, Person,
                              build_input, extract_text)
 
 ME = Person("Alice Chen", "MS CS", "NLP", "study group")
@@ -106,3 +106,60 @@ async def test_failures_raise_generation_error(resp):
 async def test_missing_key():
     with pytest.raises(GenerationError, match="not configured"):
         await GeminiGenerator("", "m").draft(ME, THEM, "CS5100")
+
+
+@pytest.mark.anyio
+async def test_error_includes_gemini_status():
+    resp = httpx.Response(400, json={"error": {"code": 400, "status": "INVALID_ARGUMENT"}})
+    with pytest.raises(GenerationError, match="400 INVALID_ARGUMENT"):
+        await _gen(lambda r: resp).draft(ME, THEM, "CS5100")
+
+
+def _limited(after):
+    return httpx.Response(429, headers={"retry-after": str(after)} if after is not None else {},
+                          json={"error": {"code": "too_many_requests"}})
+
+
+@pytest.mark.anyio
+async def test_short_rate_limit_waits_then_succeeds(monkeypatch):
+    waits = []
+
+    async def fake_sleep(s):
+        waits.append(s)
+
+    from app import icebreakers
+    monkeypatch.setattr(icebreakers.asyncio, "sleep", fake_sleep)
+    calls = []
+
+    def handler(req):
+        calls.append(1)
+        return _limited(2) if len(calls) == 1 else _ok()
+
+    assert await _gen(handler).draft(ME, THEM, "CS5100") == "Hi Maya!"
+    assert waits == [2] and len(calls) == 2
+
+
+@pytest.mark.anyio
+async def test_long_rate_limit_fails_fast_with_wait():
+    calls = []
+
+    def handler(req):
+        calls.append(1)
+        return _limited(36)
+
+    with pytest.raises(GenerationRateLimited) as e:
+        await _gen(handler).draft(ME, THEM, "CS5100")
+    assert e.value.retry_after == 36 and len(calls) == 1
+
+
+@pytest.mark.anyio
+async def test_rate_limit_without_header_retries_then_reports():
+    calls = []
+
+    def handler(req):
+        calls.append(1)
+        return _limited(None)
+
+    with pytest.raises(GenerationRateLimited) as e:
+        await _gen(handler).draft(ME, THEM, "CS5100")
+    assert e.value.retry_after is None and len(calls) == 3
