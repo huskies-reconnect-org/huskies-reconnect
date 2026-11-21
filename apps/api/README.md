@@ -41,3 +41,12 @@ python scripts/seed_demo.py                  # dry run: shows target DB and stud
 python scripts/seed_demo.py --yes            # seed or update (needs GEMINI_API_KEY)
 python scripts/seed_demo.py --remove --yes   # delete all demo users after the showcase
 ```
+
+## Live end-to-end check
+Exercises course join, matching, icebreakers and semester end against the real
+database and Gemini, acting as a demo student. Login is bypassed only inside the
+script (auth dependency override); every change is undone at the end.
+```bash
+python scripts/smoke_live.py          # dry run
+python scripts/smoke_live.py --yes    # ~4 Gemini text calls
+```
