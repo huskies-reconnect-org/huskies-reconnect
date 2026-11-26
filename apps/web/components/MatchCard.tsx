@@ -60,10 +60,12 @@ export function MatchCard({ courseId, courseCode, match: m }: { courseId: string
           <Button variant="secondary" onClick={draftIntro}>Draft intro</Button>
         ) : null}
         {draft.kind === "error" ? (
-          <Notice tone="error" title="No intro this time">
-            {draft.message}{" "}
-            <button onClick={draftIntro} className="font-bold underline underline-offset-4">Retry</button>
-          </Notice>
+          <div className="flex flex-col items-start gap-2">
+            <Notice tone="error" title="No intro this time" className="w-full">
+              {draft.message}
+            </Notice>
+            <Button variant="secondary" onClick={draftIntro}>Retry</Button>
+          </div>
         ) : null}
       </ClassmateCard>
 

@@ -1,6 +1,7 @@
 // Ported from Shaad Qureshi's UI library (PR #2).
 // Adapted: nav comes from the caller (only pages that exist here), and the right-hand
 // slot takes any action (Sign in / Sign out) instead of an account monogram.
+// Phone layout: wordmark and action share the first row; nav links are 44px tall.
 "use client";
 
 import Link from "next/link";
@@ -23,8 +24,8 @@ export function AppHeader({ nav, action }: AppHeaderProps) {
   const pathname = usePathname();
   return (
     <header className="bg-ink text-on-ink">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-8 gap-y-3 px-5 py-3.5 sm:px-8">
-        <Wordmark tone="on-ink" />
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3 sm:gap-x-8 sm:px-8 sm:py-3.5">
+        <Wordmark tone="on-ink" className="inline-flex min-h-11 items-center" />
         {nav ? (
           <nav aria-label="Main" className="order-3 flex basis-full flex-wrap gap-1 sm:order-2 sm:flex-auto sm:basis-auto">
             {nav.map((item) => {
@@ -35,7 +36,7 @@ export function AppHeader({ nav, action }: AppHeaderProps) {
                   href={item.href}
                   aria-current={current ? "page" : undefined}
                   className={cn(
-                    "rounded-field px-3.5 py-1.5 font-semibold no-underline transition-colors focus-visible:outline-on-ink",
+                    "inline-flex min-h-11 items-center rounded-field px-3.5 font-semibold no-underline transition-colors focus-visible:outline-on-ink",
                     current ? "bg-on-ink text-ink" : "text-on-ink hover:bg-ink-raised",
                   )}
                 >
@@ -44,9 +45,7 @@ export function AppHeader({ nav, action }: AppHeaderProps) {
               );
             })}
           </nav>
-        ) : (
-          <span className="order-2 flex-auto" />
-        )}
+        ) : null}
         {action ? <div className="order-2 ml-auto sm:order-3">{action}</div> : null}
       </div>
     </header>
