@@ -7,8 +7,8 @@ Simplified or preloaded pieces are fine where they don't weaken that flow. Progr
 
 ## To-do (in order)
 
-1. [ ] **Ship the foundation**
-   - [ ] Email sending via Resend (registered with NU email for now; verified custom domain before the demo)
+1. [x] **Ship the foundation**
+   - [x] Email sending via Resend from `login@huskiesreconnect.app` (custom domain verified)
    - [x] Frontend deployed to Vercel: https://huskies-reconnect.vercel.app
    - [x] Render env vars confirmed (`/health/ready` returns ok)
    - [x] PR #7 merged into `main`
