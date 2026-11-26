@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { api, ApiError, type Course, type Match, type Me } from "@/lib/api";
 import { useRequireSession } from "@/lib/useSession";
 import { MatchCard } from "@/components/MatchCard";
+import { SiteHeader } from "@/components/SiteHeader";
+import { Button, Container, MonoLabel, Notice, SiteFooter } from "@/components/ui";
 
 type State =
   | { kind: "loading" }
@@ -58,62 +60,74 @@ export default function CourseMatchesPage() {
   if (!session) return null;
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 p-6">
-      <header className="flex items-baseline justify-between">
-        <h1 className="text-2xl font-semibold">
-          {course ? `${course.code} classmates` : "Classmates"}
-        </h1>
-        <Link href="/courses" className="text-sm underline">All courses</Link>
-      </header>
-      {course && <p className="-mt-4 text-sm text-gray-600">{course.title}</p>}
+    <>
+      <SiteHeader />
+      <main id="main" className="flex-auto">
+        <Container className="flex flex-col gap-6 py-10 sm:py-12">
+          <div>
+            <Link href="/courses" className="text-small text-muted underline underline-offset-4 hover:text-red-ink">
+              All courses
+            </Link>
+            <MonoLabel className="mt-4">{course ? course.code : "Course"}</MonoLabel>
+            <h1 className="voice-casual mt-1 text-display-sm font-extrabold sm:text-display">
+              {course ? course.title : "Classmates"}
+            </h1>
+          </div>
 
-      {course?.membership === "alumni" && (
-        <p className="rounded border border-purple-300 bg-purple-50 p-3 text-sm">
-          The semester has ended. This is now your <strong>{course.code} alumni group</strong>: the classmates
-          you shared it with, ready when you want to reconnect.
-        </p>
-      )}
-
-      {isAdmin && course?.joined && (
-        <div className="flex items-center gap-2 rounded border border-dashed p-3 text-sm">
-          <span className="text-gray-600">Demo controls:</span>
-          {course.membership === "alumni" ? (
-            <button disabled={adminBusy} onClick={() => changeSemester("reset")}
-              className="rounded border px-3 py-1 disabled:opacity-50">Undo semester end</button>
-          ) : (
-            <button disabled={adminBusy} onClick={() => changeSemester("end")}
-              className="rounded bg-purple-700 px-3 py-1 text-white disabled:opacity-50">Simulate semester end</button>
+          {course?.membership === "alumni" && (
+            <Notice title="The semester has ended">
+              This is now your <strong>{course.code} alumni group</strong>: the classmates you shared it with,
+              ready when you want to reconnect.
+            </Notice>
           )}
-        </div>
-      )}
 
-      {state.kind === "loading" && <p className="text-sm">Finding classmates…</p>}
+          {isAdmin && course?.joined && (
+            <div className="flex flex-wrap items-center gap-3 rounded-field border-2 border-dashed border-heather-deep p-3">
+              <MonoLabel>Demo controls</MonoLabel>
+              {course.membership === "alumni" ? (
+                <Button variant="secondary" disabled={adminBusy} onClick={() => changeSemester("reset")}>
+                  Undo semester end
+                </Button>
+              ) : (
+                <Button variant="secondary" disabled={adminBusy} onClick={() => changeSemester("end")}>
+                  Simulate semester end
+                </Button>
+              )}
+            </div>
+          )}
 
-      {state.kind === "needs-profile" && (
-        <p className="rounded border border-amber-300 bg-amber-50 p-3 text-sm">
-          Add your interests and goals first. <Link href="/profile" className="underline">Complete your profile</Link>
-        </p>
-      )}
+          {state.kind === "loading" && <p className="text-muted">Finding classmates…</p>}
 
-      {state.kind === "not-member" && (
-        <p className="rounded border p-3 text-sm">
-          Join this course to see classmates. <Link href="/courses" className="underline">Back to courses</Link>
-        </p>
-      )}
+          {state.kind === "needs-profile" && (
+            <Notice title="Add your interests and goals first">
+              <Link href="/profile" className="font-bold underline underline-offset-4">Complete your profile</Link>
+            </Notice>
+          )}
 
-      {state.kind === "error" && <p role="alert" className="text-sm text-red-600">{state.message}</p>}
+          {state.kind === "not-member" && (
+            <Notice title="Join this course to see classmates">
+              <Link href="/courses" className="font-bold underline underline-offset-4">Back to courses</Link>
+            </Notice>
+          )}
 
-      {state.kind === "ready" && state.matches.length === 0 && (
-        <p className="rounded border p-3 text-sm">
-          No strong matches yet. As more classmates join and fill in their profiles, they&apos;ll show up here.
-        </p>
-      )}
+          {state.kind === "error" && <Notice tone="error" title="Something went wrong">{state.message}</Notice>}
 
-      {state.kind === "ready" && state.matches.length > 0 && (
-        <ul className="flex flex-col gap-3">
-          {state.matches.map((m) => <MatchCard key={`${m.user_id}-${course?.membership}`} courseId={id} match={m} />)}
-        </ul>
-      )}
-    </main>
+          {state.kind === "ready" && state.matches.length === 0 && (
+            <Notice title="No classmates to show yet">
+              As more classmates join and fill in their profiles, they&apos;ll show up here.
+            </Notice>
+          )}
+
+          {state.kind === "ready" && state.matches.length > 0 && (
+            <ul className="grid items-start gap-6 md:grid-cols-2">
+              {state.matches.map((m) => (
+                <MatchCard key={`${m.user_id}-${course?.membership}`} courseId={id} courseCode={course?.code ?? ""} match={m} />
+              ))}
+            </ul>
+          )}
+        </Container>
+      </main>
+      <SiteFooter />
+    </>
   );
 }

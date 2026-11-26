@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { api, type Icebreaker, type Match } from "@/lib/api";
+import { Button, ClassmateCard, IntroCard, Notice } from "@/components/ui";
 
 // Raw cosine similarity isn't shown: unrelated profiles still score ~0.8, which would read as "80%".
 const STRENGTH = {
-  strong: { label: "Strong match", className: "bg-green-100 text-green-800" },
-  good: { label: "Good match", className: "bg-blue-100 text-blue-800" },
-  possible: { label: "Possible match", className: "bg-gray-100 text-gray-700" },
+  strong: "Strong match",
+  good: "Good match",
+  possible: "Possible match",
 } as const;
 
 type Draft =
@@ -17,9 +18,10 @@ type Draft =
   | { kind: "blocked" }
   | { kind: "error"; message: string };
 
-export function MatchCard({ courseId, match: m }: { courseId: string; match: Match }) {
+export function MatchCard({ courseId, courseCode, match: m }: { courseId: string; courseCode: string; match: Match }) {
   const [draft, setDraft] = useState<Draft>({ kind: "idle" });
   const [copied, setCopied] = useState(false);
+  const name = m.full_name ?? "Classmate";
 
   async function draftIntro() {
     setDraft({ kind: "loading" });
@@ -42,58 +44,55 @@ export function MatchCard({ courseId, match: m }: { courseId: string; match: Mat
   }
 
   return (
-    <li className="flex flex-col gap-2 rounded border p-4">
-      <div className="flex items-baseline justify-between gap-4">
-        <p className="font-medium">
-          {m.full_name ?? "Classmate"}
-          {m.is_demo && (
-            <span className="ml-2 rounded bg-gray-100 px-1.5 py-0.5 text-xs font-normal text-gray-600"
-              title="Fictional student seeded for the demo">
-              Demo profile
-            </span>
-          )}
-        </p>
-        <span className={`rounded px-2 py-0.5 text-xs ${STRENGTH[m.strength].className}`}>
-          {STRENGTH[m.strength].label}
-        </span>
-      </div>
-      <p className="text-sm text-gray-600">
-        {[m.major, m.grad_year && `Class of ${m.grad_year}`].filter(Boolean).join(" · ")}
-      </p>
-      {m.interests && <p className="text-sm"><span className="font-medium">Interests:</span> {m.interests}</p>}
-      {m.goals && <p className="text-sm"><span className="font-medium">Goals:</span> {m.goals}</p>}
+    <li className="flex flex-col gap-3">
+      <ClassmateCard
+        name={name}
+        courseCode={courseCode}
+        program={[m.major, m.grad_year && `Class of ${m.grad_year}`].filter(Boolean).join(" · ")}
+        context={m.is_demo ? "Demo profile" : undefined}
+        strength={{ label: STRENGTH[m.strength], tone: m.strength }}
+        details={[
+          { label: "Interests", text: m.interests ?? "" },
+          { label: "Goals", text: m.goals ?? "" },
+        ]}
+      >
+        {draft.kind === "idle" ? (
+          <Button variant="secondary" onClick={draftIntro}>Draft intro</Button>
+        ) : null}
+        {draft.kind === "error" ? (
+          <Notice tone="error" title="No intro this time">
+            {draft.message}{" "}
+            <button onClick={draftIntro} className="font-bold underline underline-offset-4">Retry</button>
+          </Notice>
+        ) : null}
+      </ClassmateCard>
 
-      {draft.kind === "idle" && (
-        <button onClick={draftIntro} className="self-start rounded bg-black px-3 py-1 text-sm text-white">
-          Draft intro
-        </button>
-      )}
-      {draft.kind === "loading" && <p className="text-sm text-gray-600">Drafting an intro…</p>}
-
-      {draft.kind === "ok" && (
-        <div className="flex flex-col gap-2 rounded bg-gray-50 p-3">
-          <p className="whitespace-pre-wrap text-sm">{draft.message}</p>
-          <div className="flex gap-2">
-            <button onClick={() => copy(draft.message)} className="rounded bg-black px-3 py-1 text-sm text-white">
-              {copied ? "Copied" : "Copy"}
-            </button>
-            <button onClick={draftIntro} className="rounded border px-3 py-1 text-sm">Regenerate</button>
-          </div>
-          <p className="text-xs text-gray-500">AI-drafted and safety-checked. Edit it to sound like you before sending.</p>
-        </div>
-      )}
-
-      {draft.kind === "blocked" && (
-        <p className="text-sm text-amber-700">
-          We couldn&apos;t draft an intro that passed our safety check.{" "}
-          <button onClick={draftIntro} className="underline">Try again</button>
-        </p>
-      )}
-      {draft.kind === "error" && (
-        <p role="alert" className="text-sm text-red-600">
-          {draft.message} <button onClick={draftIntro} className="underline">Retry</button>
-        </p>
-      )}
+      {draft.kind === "loading" ? (
+        <IntroCard recipientName={name} courseCode={courseCode} safety="checking" />
+      ) : null}
+      {draft.kind === "ok" ? (
+        <IntroCard
+          recipientName={name}
+          courseCode={courseCode}
+          safety="passed"
+          body={draft.message}
+          actions={
+            <>
+              <Button variant="secondary" onClick={() => copy(draft.message)}>{copied ? "Copied" : "Copy"}</Button>
+              <Button variant="quiet" onClick={draftIntro}>Regenerate</Button>
+            </>
+          }
+        />
+      ) : null}
+      {draft.kind === "blocked" ? (
+        <IntroCard
+          recipientName={name}
+          courseCode={courseCode}
+          safety="held"
+          safetyReason="Our safety check didn't pass the drafts for this pair."
+          actions={<Button variant="secondary" onClick={draftIntro}>Try again</Button>}
+        />
+      ) : null}
     </li>
   );
 }
