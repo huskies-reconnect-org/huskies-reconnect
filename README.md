@@ -116,7 +116,7 @@ cp ../../.env.example .env.local    # fill in the NEXT_PUBLIC_* values
 npm run dev                         # http://localhost:3000
 ```
 
-More detail: [`apps/api/README.md`](apps/api/README.md) (endpoints, tests, demo data), [`apps/web/README.md`](apps/web/README.md), [`schema/README.md`](schema/README.md) (migrations).
+More detail: [`apps/api/README.md`](apps/api/README.md) (endpoints, tests, demo data, pre-demo check), [`docs/demo-script.md`](docs/demo-script.md), [`apps/web/README.md`](apps/web/README.md), [`schema/README.md`](schema/README.md) (migrations).
 
 ---
 

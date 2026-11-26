@@ -50,3 +50,10 @@ script (auth dependency override); every change is undone at the end.
 python scripts/smoke_live.py          # dry run
 python scripts/smoke_live.py --yes    # ~4 Gemini text calls
 ```
+
+## Pre-demo check
+Read-only go / no-go before presenting: wakes Render, checks readiness, Vercel, CORS,
+demo data and the presenter's profile and matches. Uses no Gemini quota.
+```bash
+python scripts/predemo_check.py --presenter you@northeastern.edu
+```

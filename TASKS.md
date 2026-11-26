@@ -19,6 +19,7 @@ Simplified or preloaded pieces are fine where they don't weaken that flow. Progr
 6. [x] **Icebreaker:** "Draft intro" button → Gemini → safety check → shown on screen
 7. [x] **Stretch, only if time allows:** "Simulate semester end" button (course becomes an alumni group)
 8. [ ] **Rehearsal:** full pass on the deployed site, bug fixes, demo script
+9. [ ] **Optional, only after #8 and if time allows:** port selected components from Shaad's PR #2 (e.g. `ClassmateCard`, `IntroCard`, landing page) into the current Next.js 15 app. PR #2 stays open; it isn't merged as is.
 
 ## Deliberately out of scope for Dec 5
 - LangGraph pipeline orchestration and LangSmith tracing
