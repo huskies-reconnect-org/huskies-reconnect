@@ -163,3 +163,17 @@ async def test_rate_limit_without_header_retries_then_reports():
     with pytest.raises(GenerationRateLimited) as e:
         await _gen(handler).draft(ME, THEM, "CS5100")
     assert e.value.retry_after is None and len(calls) == 3
+
+
+def test_situation_line_matches_mode():
+    current = build_input(ME, THEM, "CS5100")
+    reconnect = build_input(ME, THEM, "CS5100", reconnecting=True)
+    assert current.startswith("Situation: you are both taking CS5100 right now.")
+    assert reconnect.startswith("Situation: you took CS5100 together last semester.")
+    assert "not studying together" in reconnect and "study session" not in reconnect
+
+
+def test_system_instruction_is_tense_neutral():
+    from app.icebreakers import SYSTEM_INSTRUCTION
+    assert "who are in the same course" not in SYSTEM_INSTRUCTION
+    assert "study session" not in SYSTEM_INSTRUCTION

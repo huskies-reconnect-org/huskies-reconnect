@@ -30,3 +30,4 @@ def test_ready_reports_unconfigured_database(monkeypatch):
     r = client.get("/health/ready")
     assert r.status_code == 503
     assert r.json()["checks"] == {"database": "not_configured", "auth_keys": "ok", "gemini": "not_configured"}
+    assert r.json()["version"]

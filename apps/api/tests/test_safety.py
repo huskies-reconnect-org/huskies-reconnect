@@ -1,6 +1,6 @@
 import pytest
 
-from app.safety import check_intro
+from app.safety import check_intro, check_reconnect_tone
 
 GOOD = ("Hi Maya! I saw we're both in CS5100 and both into evaluating language models. "
         "I'd love to compare notes on the NLP side of the course. Want to grab coffee at Snell "
@@ -50,4 +50,27 @@ def test_names_that_contain_blocked_substrings_pass():
 ])
 def test_rejections(text, reason):
     r = check_intro(text)
+    assert not r.ok and r.reason == reason
+
+
+@pytest.mark.parametrize("text", [
+    "Hi Maya, it's Poornima from CS5100 last semester! I'd love to catch up over coffee.",
+    "Hey Aisha! It's been a while since we were in CS5100 together. Want to grab coffee and catch up?",
+    "Hi Daniel, I was thinking about CS5100 since the course ended. Coffee sometime to reconnect?",
+    "Hi Maya, it's Poornima from CS5100 last semester! I hope your classes are going well this semester. Coffee to catch up?",
+    "Hey Priya! We were in CS5100 together last semester. Since we're both in the MS Computer Science program, coffee to catch up?",
+])
+def test_reconnect_tone_passes(text):
+    assert check_reconnect_tone(text).ok
+
+
+@pytest.mark.parametrize("text, reason", [
+    ("Hi Maya! Since we're both in CS5100, it would be awesome to connect and share notes.", "ongoing_course"),
+    ("Hi Maya, it's been a while! Want to set up a study session before the final?", "ongoing_course"),
+    ("Hi Maya, we're both taking CS 5100, so let's catch up!", "ongoing_course"),
+    ("Hi Maya, since we are both in the course, let's catch up!", "ongoing_course"),
+    ("Hi Maya, I love that you're into NLP. Coffee sometime?", "no_reconnect_framing"),
+])
+def test_reconnect_tone_rejects(text, reason):
+    r = check_reconnect_tone(text)
     assert not r.ok and r.reason == reason

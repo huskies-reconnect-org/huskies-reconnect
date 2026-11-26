@@ -14,7 +14,7 @@ from app.db import get_conn
 from app.deps import get_current_user_id
 from app.icebreakers import (GenerationBlocked, GenerationError, GenerationRateLimited, Generator, Person,
                              get_generator)
-from app.safety import check_intro
+from app.safety import check_intro, check_reconnect_tone
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/courses", tags=["icebreakers"])
@@ -91,10 +91,10 @@ async def draft_icebreaker(
     sender = Person(row["me_name"] or "A classmate", row["me_major"], row["me_interests"], row["me_goals"])
     classmate = Person(row["them_name"] or "Classmate", row["them_major"], row["them_interests"], row["them_goals"])
 
-    for attempt in range(2):  # one retry if our own check rejects a draft
+    reconnecting = row["my_status"] == "alumni"
+    for attempt in range(2):  # one retry if our own checks reject a draft
         try:
-            text = await generator.draft(sender, classmate, row["course"],
-                                         reconnecting=row["my_status"] == "alumni")
+            text = await generator.draft(sender, classmate, row["course"], reconnecting=reconnecting)
         except GenerationBlocked as e:
             log.info("icebreaker blocked by Gemini filter: %s", e)
             return Icebreaker(status="blocked", message=None, model=generator.model)
@@ -109,6 +109,8 @@ async def draft_icebreaker(
             raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Couldn't draft an intro right now")
 
         result = check_intro(text)
+        if result.ok and reconnecting:
+            result = check_reconnect_tone(text)
         if result.ok:
             return Icebreaker(status="ok", message=text.strip(), model=generator.model)
         log.info("icebreaker draft rejected by safety check (attempt %d): %s", attempt + 1, result.reason)

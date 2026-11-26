@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import httpx
 
@@ -65,4 +66,6 @@ async def ready(response: Response) -> dict:
     ok = all(v == "ok" for v in checks.values())
     if not ok:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
-    return {"status": "ok" if ok else "degraded", "checks": checks}
+    # Render sets RENDER_GIT_COMMIT, so we can tell which code is actually deployed.
+    version = (os.environ.get("RENDER_GIT_COMMIT") or "local")[:7]
+    return {"status": "ok" if ok else "degraded", "checks": checks, "version": version}

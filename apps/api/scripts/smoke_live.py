@@ -23,7 +23,7 @@ from app import demo_seed  # noqa: E402
 from app.config import get_settings  # noqa: E402
 from app.deps import get_current_user_id  # noqa: E402
 from app.main import app  # noqa: E402
-from app.safety import check_intro  # noqa: E402
+from app.safety import check_intro, check_reconnect_tone  # noqa: E402
 
 ACTOR = next(s for s in demo_seed.STUDENTS if s.slug == "maya.patel")
 JOIN_CODE = "CS5200"   # a course the actor isn't in
@@ -144,6 +144,8 @@ def main() -> int:
             body = r.json()
             check(body.get("status") == "ok", "reconnect draft after semester end")
             if body.get("message"):
+                tone = check_reconnect_tone(body["message"])
+                check(tone.ok, "reconnect draft reads as catching up (past tense)", tone.reason or "")
                 print(f"       “{body['message']}”")
             r = c.post(f"/courses/{ids[MATCH_CODE]}/semester", json={"action": "reset"})
             check(r.status_code == 200 and r.json()["status"] == "active", "undo semester end")

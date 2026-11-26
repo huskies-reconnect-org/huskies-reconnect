@@ -42,3 +42,24 @@ def check_intro(text: str) -> SafetyResult:
         if pattern.search(t):
             return SafetyResult(False, name)
     return SafetyResult(True)
+
+
+# Reconnect drafts (after the semester ends) must read as catching up, never as if the
+# course were still running. The model doesn't always follow the instruction, so this
+# is enforced here and a failing draft is redrafted.
+_RECONNECT_CUE = re.compile(
+    r"last (semester|term|fall|spring)|were in .{0,40}together|took .{0,40}together|back in"
+    r"|since (the )?(course|class|semester|term) (ended|wrapped|finished)|since we finished"
+    r"|catch up|catching up|reconnect|been a (while|minute)", re.I)
+_ONGOING_COURSE = re.compile(
+    r"we('re| are) both (in|taking|enrolled in) (this |the )?(course|class|[a-z]{2,5} ?\d{4})|share notes|compare notes on (the )?(lectures?|homework|assignments)"
+    r"|study (group|session|together|partner)|before the (midterm|final|exam)|after (class|lecture)"
+    r"|this week'?s (lecture|class|homework)", re.I)
+
+
+def check_reconnect_tone(text: str) -> SafetyResult:
+    if _ONGOING_COURSE.search(text):
+        return SafetyResult(False, "ongoing_course")
+    if not _RECONNECT_CUE.search(text):
+        return SafetyResult(False, "no_reconnect_framing")
+    return SafetyResult(True)

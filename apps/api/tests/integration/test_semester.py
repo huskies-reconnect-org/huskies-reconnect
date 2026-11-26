@@ -96,3 +96,38 @@ def test_is_admin_false_by_default(client, world, admin_email):
     _, me, _, _ = world
     client.login(me)
     assert client.get("/me").json()["is_admin"] is False
+
+
+def test_present_tense_reconnect_draft_is_redrafted(client, world, admin_email):
+    course, me, bob, my_email = world
+    admin_email(my_email)
+    drafts = ["Hi Bob! Since we're both in CS5100, it would be awesome to connect and share notes.",
+              "Hi Bob, it's Alice from CS5100 last semester! Want to grab coffee and catch up?"]
+
+    class Gen:
+        model = "fake"
+        calls = 0
+        async def draft(self, sender, classmate, course, reconnecting=False):
+            Gen.calls += 1
+            return drafts.pop(0)
+
+    app.dependency_overrides[get_generator] = lambda: Gen()
+    ib_router._recent.clear()
+    client.login(me)
+    client.post(f"/courses/{course}/semester", json={"action": "end"})
+    r = client.post(f"/courses/{course}/matches/{bob}/icebreaker").json()
+    assert r["status"] == "ok" and "last semester" in r["message"] and Gen.calls == 2
+
+
+def test_current_semester_drafts_skip_tone_check(client, world):
+    course, me, bob, _ = world
+
+    class Gen:
+        model = "fake"
+        async def draft(self, sender, classmate, course, reconnecting=False):
+            return "Hi Bob! Since we're both in CS5100, want to set up a study session?"
+
+    app.dependency_overrides[get_generator] = lambda: Gen()
+    ib_router._recent.clear()
+    client.login(me)
+    assert client.post(f"/courses/{course}/matches/{bob}/icebreaker").json()["status"] == "ok"
