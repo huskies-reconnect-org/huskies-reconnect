@@ -51,7 +51,8 @@ def main() -> int:
         check(False, f"Render API reachable ({type(e).__name__})", "check the Render dashboard")
     try:
         r = httpx.get(f"{WEB}/login", timeout=30)
-        check(r.status_code == 200 and "Sign in to Huskies Reconnect" in r.text, "Vercel login page loads")
+        # "Northeastern email" is the login form's field label; it survives restyles of the headline.
+        check(r.status_code == 200 and "Northeastern email" in r.text, "Vercel login page loads")
         r = httpx.options(f"{API}/me", timeout=30, headers={
             "Origin": WEB, "Access-Control-Request-Method": "GET",
             "Access-Control-Request-Headers": "authorization"})
