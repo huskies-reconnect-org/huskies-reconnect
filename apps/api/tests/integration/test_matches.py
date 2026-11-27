@@ -89,8 +89,18 @@ def test_response_fields(client, student, course):
     client.login(me)
     m = client.get(f"/courses/{course}/matches").json()[0]
     assert set(m) == {"user_id", "full_name", "major", "grad_year", "interests", "goals", "similarity",
-                      "strength", "is_demo"}
+                      "strength", "is_demo", "avatar_color", "avatar_badge"}
     assert "email" not in m
+    assert m["avatar_color"] is None and m["avatar_badge"] is None
+
+
+def test_matches_show_classmates_avatar(client, student, course, db):
+    me = student("me", vec(1, 0), course)
+    bob = student("Bob", vec(1, 0.1), course)
+    db.execute("update public.users set avatar_color = 'teal', avatar_badge = 'Robotics' where id = %s", (bob,))
+    client.login(me)
+    m = client.get(f"/courses/{course}/matches").json()[0]
+    assert m["avatar_color"] == "teal" and m["avatar_badge"] == "Robotics"
 
 
 def test_non_member_is_403(client, student, course, other_course):

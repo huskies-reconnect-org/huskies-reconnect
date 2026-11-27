@@ -26,6 +26,8 @@ class DemoStudent:
     interests: str
     goals: str
     courses: tuple[str, ...] = ("CS5100",)
+    avatar_color: str | None = None
+    avatar_badge: str | None = None
 
     @property
     def id(self) -> str:
@@ -40,29 +42,37 @@ STUDENTS: tuple[DemoStudent, ...] = (
     DemoStudent("maya.patel", "Maya Patel", "MS Computer Science", 2027,
                 "Natural language processing, evaluating large language models, contributing to open-source ML libraries",
                 "Join an NLP research group and start a study group for CS6120",
-                ("CS5100", "CS6120")),
+                ("CS5100", "CS6120"),
+                avatar_color="blush", avatar_badge="Natural language processing"),
     DemoStudent("daniel.okafor", "Daniel Okafor", "MS Artificial Intelligence", 2027,
                 "Reinforcement learning, robotics, building and flying drones",
-                "Land a robotics co-op and find a partner for an RL course project"),
+                "Land a robotics co-op and find a partner for an RL course project",
+                avatar_color="peach", avatar_badge="robotics"),
     DemoStudent("sofia.ramirez", "Sofia Ramirez", "MS Data Science", 2026,
                 "Machine learning for healthcare, clinical data, fairness in medical AI",
-                "Find a health-tech co-op and connect with other women in data science"),
+                "Find a health-tech co-op and connect with other women in data science",
+                avatar_color="mint", avatar_badge="Machine learning for healthcare"),
     DemoStudent("ethan.liu", "Ethan Liu", "MS Computer Science", 2027,
                 "Computer vision, augmented reality, street photography",
-                "Build a computer vision portfolio project and form a hackathon team"),
+                "Build a computer vision portfolio project and form a hackathon team",
+                avatar_color="lavender", avatar_badge="Computer vision"),
     DemoStudent("priya.raman", "Priya Raman", "MS Computer Science", 2026,
                 "Time-series forecasting, fintech, competitive chess",
-                "Get a quant or fintech internship and find a mock-interview partner"),
+                "Get a quant or fintech internship and find a mock-interview partner",
+                avatar_color="butter", avatar_badge="fintech"),
     DemoStudent("jordan.kim", "Jordan Kim", "MS Computer Science (Align)", 2027,
                 "AI in education, accessibility, career switch from high school teaching",
-                "Find an algorithms study group and a mentor who also switched into tech"),
+                "Find an algorithms study group and a mentor who also switched into tech",
+                avatar_color="teal", avatar_badge="AI in education"),
     DemoStudent("aisha.hassan", "Aisha Hassan", "MS Artificial Intelligence", 2027,
                 "AI ethics and policy, language model safety, debate",
                 "Co-write a paper on responsible AI and start a reading group on LLM safety",
-                ("CS5100", "CS6120")),
+                ("CS5100", "CS6120"),
+                avatar_color="sky", avatar_badge="AI ethics and policy"),
     DemoStudent("lucas.moreau", "Lucas Moreau", "MS Computer Science", 2026,
                 "Game AI, procedural generation, indie games, composing music",
-                "Form a team for a game jam and find a co-founder for an indie game"),
+                "Form a team for a game jam and find a co-founder for an indie game",
+                avatar_color="stone", avatar_badge="Game AI"),
 )
 
 
@@ -98,11 +108,13 @@ async def seed(conn: psycopg.AsyncConnection, embedder: Embedder) -> int:
                 """update public.users
                       set full_name = %(full_name)s, major = %(major)s, grad_year = %(grad_year)s,
                           interests = %(interests)s, goals = %(goals)s, is_demo = true,
+                          avatar_color = %(avatar_color)s, avatar_badge = %(avatar_badge)s,
                           embedding = %(embedding)s::extensions.vector,
                           embedding_model = %(model)s, embedded_at = now()
                     where id = %(id)s""",
                 {"id": s.id, "full_name": s.full_name, "major": s.major, "grad_year": s.grad_year,
                  "interests": s.interests, "goals": s.goals, "embedding": vectors[s.slug],
+                 "avatar_color": s.avatar_color, "avatar_badge": s.avatar_badge,
                  "model": embedding_tag(embedder.model)},
             )
             for code in s.courses:

@@ -82,6 +82,8 @@ export type Database = {
       }
       users: {
         Row: {
+          avatar_badge: string | null
+          avatar_color: string | null
           created_at: string
           email: string
           embedded_at: string | null
@@ -96,6 +98,8 @@ export type Database = {
           major: string | null
         }
         Insert: {
+          avatar_badge?: string | null
+          avatar_color?: string | null
           created_at?: string
           email: string
           embedded_at?: string | null
@@ -110,6 +114,8 @@ export type Database = {
           major?: string | null
         }
         Update: {
+          avatar_badge?: string | null
+          avatar_color?: string | null
           created_at?: string
           email?: string
           embedded_at?: string | null

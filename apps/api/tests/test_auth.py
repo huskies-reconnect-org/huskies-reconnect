@@ -76,7 +76,8 @@ def auth(token):
 def test_valid_token_returns_profile(client):
     _use_db_row({"id": USER_ID, "email": "alice@northeastern.edu",
                  "full_name": "Alice", "major": None, "grad_year": None,
-                 "interests": None, "goals": None, "matchable": False})
+                 "interests": None, "goals": None, "avatar_color": None, "avatar_badge": None,
+                 "matchable": False})
     r = client.get("/me", headers=auth(make_token()))
     assert r.status_code == 200
     assert r.json()["id"] == USER_ID

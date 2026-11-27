@@ -20,6 +20,8 @@ class Match(BaseModel):
     grad_year: int | None
     interests: str | None
     goals: str | None
+    avatar_color: str | None
+    avatar_badge: str | None
     similarity: float
     strength: Literal["strong", "good", "possible"]
     is_demo: bool
@@ -33,6 +35,7 @@ _MATCHES_SQL = """
           join public.course_members m on m.user_id = u.id and m.course_id = %(course)s
          where u.id = %(me)s)
     select u.id as user_id, u.full_name, u.major, u.grad_year, u.interests, u.goals, u.is_demo,
+           u.avatar_color, u.avatar_badge,
            1 - (u.embedding OPERATOR(extensions.<=>) me.embedding) as similarity
       from public.course_members m
       join public.users u on u.id = m.user_id
