@@ -117,8 +117,31 @@ body {
   19.5%, 100% { opacity: 0; translate: 0 -0.35em; }
 }
 
+/* Husky reunion (components/HuskyReunion.tsx): run in from both sides with a hop and
+   swinging legs (1.6 s), meet nose to nose, heart pops and beats, tails keep wagging. */
+.hr-run-left { animation: hr-in-left 1.6s cubic-bezier(0.25, 0.8, 0.3, 1) both; }
+.hr-run-right { animation: hr-in-right 1.6s cubic-bezier(0.25, 0.8, 0.3, 1) both; }
+@keyframes hr-in-left { from { translate: -220px 0; opacity: 0; } 12% { opacity: 1; } to { translate: 0 0; opacity: 1; } }
+@keyframes hr-in-right { from { translate: 220px 0; opacity: 0; } 12% { opacity: 1; } to { translate: 0 0; opacity: 1; } }
+.hr-hop { animation: hr-hop 0.27s ease-in-out 6 alternate; }
+@keyframes hr-hop { from { translate: 0 0; } to { translate: 0 -7px; } }
+.hr-leg-a { animation: hr-leg 0.27s ease-in-out 6 alternate; }
+.hr-leg-b { animation: hr-leg 0.27s ease-in-out 6 alternate-reverse; }
+@keyframes hr-leg { from { rotate: 24deg; } to { rotate: -24deg; } }
+.hr-tail { animation: hr-wag 0.45s ease-in-out 1.6s infinite alternate; }
+@keyframes hr-wag { from { rotate: -14deg; } to { rotate: 16deg; } }
+.hr-heart {
+  opacity: 0;
+  scale: 0.3;
+  animation: hr-heart 0.7s cubic-bezier(0.3, 1.6, 0.5, 1) 1.6s forwards, hr-beat 1.6s ease-in-out 2.4s infinite;
+}
+@keyframes hr-heart { to { opacity: 1; scale: 1; } }
+@keyframes hr-beat { 0%, 100% { scale: 1; } 15% { scale: 1.2; } 30% { scale: 1; } }
+
 @media (prefers-reduced-motion: reduce) {
   .paw-trail { display: none; }
+  .hr-run-left, .hr-run-right, .hr-hop, .hr-leg-a, .hr-leg-b, .hr-tail { animation: none; }
+  .hr-heart { animation: none; opacity: 1; scale: 1; }
   .mq-word { animation: none; }
   .mq-line:first-child .mq-word { opacity: 1; }
   .paw-step, .group:hover .paw-wave, .hero-float-a, .hero-float-b, .hero-badge { animation: none; }
