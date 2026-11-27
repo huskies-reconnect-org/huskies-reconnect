@@ -28,3 +28,8 @@ body {
   outline: 2px solid var(--color-husky);
   outline-offset: 2px;
 }
+
+/* Focus ring on the red header: the default red ring would be invisible. */
+.on-red:focus-visible {
+  outline-color: #fff;
+}

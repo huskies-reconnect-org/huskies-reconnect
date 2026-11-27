@@ -10,10 +10,11 @@ export function PawIcon({ className = "h-6 w-6 fill-husky" }: { className?: stri
   );
 }
 
-export function Wordmark() {
+/** `inverse` is for the red header/footer: white paw, text color inherited. */
+export function Wordmark({ inverse = false }: { inverse?: boolean }) {
   return (
     <span className="flex items-center gap-2.5">
-      <PawIcon className="h-7 w-7 fill-husky" />
+      <PawIcon className={`h-7 w-7 ${inverse ? "fill-white" : "fill-husky"}`} />
       <span className="font-display text-lg font-bold tracking-tight">Huskies Reconnect</span>
     </span>
   );
