@@ -78,3 +78,27 @@ async def join_course(
             await cur.execute(_COURSE_SELECT + " where c.id = %(course_id)s",
                               {"user_id": user_id, "course_id": course_id})
             return await cur.fetchone()
+
+
+@router.delete("/{course_id}/join", response_model=Course)
+async def leave_course(
+    course_id: UUID,
+    user_id: str = Depends(get_current_user_id),
+    conn: AsyncConnection = Depends(get_conn),
+) -> Course:
+    """Leave a course (active or alumni). Idempotent: leaving a course you're not in
+    returns it unchanged. Only the membership row goes; nothing else references it,
+    and matches are computed live, so you simply drop out of classmates' lists."""
+    async with conn.transaction():
+        await conn.execute(
+            "delete from public.course_members where user_id = %s and course_id = %s",
+            (user_id, course_id),
+        )
+        async with conn.cursor(row_factory=class_row(Course)) as cur:
+            await cur.execute(_COURSE_SELECT + " where c.id = %(course_id)s",
+                              {"user_id": user_id, "course_id": course_id})
+            course = await cur.fetchone()
+        if course is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Course not found")
+        return course
+

@@ -57,7 +57,57 @@ def test_join_without_profile_row_is_409(client):
     assert client.post(f"/courses/{cid}/join").status_code == 409
 
 
+def test_leave_removes_membership(client, make_user, db):
+    alice, bob = make_user("alice"), make_user("bob")
+    client.login(alice)
+    cid = _course_id(client, "CS5100")
+    client.post(f"/courses/{cid}/join")
+    client.login(bob)
+    client.post(f"/courses/{cid}/join")
+
+    client.login(alice)
+    r = client.delete(f"/courses/{cid}/join")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["joined"] is False and body["membership"] is None and body["member_count"] == 1
+    assert db.execute("select count(*) from public.course_members where user_id = %s", (alice,)).fetchone()[0] == 0
+    # Bob is untouched, and Alice can rejoin.
+    assert db.execute("select count(*) from public.course_members where user_id = %s", (bob,)).fetchone()[0] == 1
+    assert client.post(f"/courses/{cid}/join").json()["joined"] is True
+
+
+def test_leave_as_alumni(client, make_user, db):
+    alice = make_user("alice")
+    client.login(alice)
+    cid = _course_id(client, "CS5100")
+    client.post(f"/courses/{cid}/join")
+    db.execute("update public.course_members set status = 'alumni' where user_id = %s", (alice,))
+    assert client.delete(f"/courses/{cid}/join").json()["joined"] is False
+
+
+def test_leave_is_idempotent(client, make_user):
+    client.login(make_user())
+    cid = _course_id(client, "CS5200")
+    r = client.delete(f"/courses/{cid}/join")  # never joined
+    assert r.status_code == 200 and r.json()["joined"] is False
+
+
+def test_leave_unknown_course_is_404(client, make_user):
+    client.login(make_user())
+    assert client.delete(f"/courses/{uuid.uuid4()}/join").status_code == 404
+
+
+def test_leave_then_matches_is_403(client, make_user):
+    client.login(make_user())
+    cid = _course_id(client, "CS5100")
+    client.post(f"/courses/{cid}/join")
+    client.delete(f"/courses/{cid}/join")
+    assert client.get(f"/courses/{cid}/matches").status_code == 403
+
+
 def test_courses_require_login(migrated_db):
     from fastapi.testclient import TestClient
     from app.main import app
-    assert TestClient(app).get("/courses").status_code == 401
+    c = TestClient(app)
+    assert c.get("/courses").status_code == 401
+    assert c.delete(f"/courses/{uuid.uuid4()}/join").status_code == 401
