@@ -40,6 +40,7 @@ Live site: https://huskies-reconnect.vercel.app
 | "We couldn't draft an intro that passed our safety check" | Click **Try again** once. This is the safety layer refusing a draft, which is itself worth pointing out. |
 | No classmates under CS5100 | Your profile is too vague or you're not in the course. Edit the profile with specific interests (NLP, LLMs, robotics…) and save. |
 | Signed out unexpectedly | Use the pre-opened signed-in browser profile; don't wait for an email on stage. |
+| Pressed **Leave CS5100** by accident | Go to **Courses** and press **Join** on CS5100. Your profile is unchanged, so the same matches come back. |
 | Vercel itself is down | Run locally (`npm run dev` in `apps/web`, `uvicorn` in `apps/api`) at http://localhost:3000. |
 
 ## Likely questions
