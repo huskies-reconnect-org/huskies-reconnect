@@ -7,7 +7,7 @@ import { api, ApiError, type Course, type Match, type Me } from "@/lib/api";
 import { useRequireSession } from "@/lib/useSession";
 import { LeaveCourse } from "@/components/LeaveCourse";
 import { MatchCard } from "@/components/MatchCard";
-import { PawIcon } from "@/components/PawLogo";
+import { PawIcon, PawLoader } from "@/components/PawLogo";
 
 type State =
   | { kind: "loading" }
@@ -158,7 +158,7 @@ export default function CourseMatchesPage() {
                 </div>
               </div>
             ))}
-            <p role="status" className="text-sm text-muted">Finding classmates…</p>
+            <p role="status" className="flex items-center gap-2 text-sm text-muted"><PawLoader /> Finding classmates…</p>
           </div>
         )}
 

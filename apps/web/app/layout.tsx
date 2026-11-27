@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { NavBar } from "@/components/NavBar";
-import { SiteFooter } from "@/components/SiteFooter";
+import { PawTrail } from "@/components/PawTrail";
 import "./globals.css";
 
 const inter = Inter({
@@ -28,10 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${spaceGrotesk.variable} flex min-h-dvh flex-col antialiased`}>
+        <PawTrail />
         <NavBar />
-        {/* Pages fill the space between nav and footer, so the footer sits at the bottom of short pages. */}
         <div className="flex flex-1 flex-col">{children}</div>
-        <SiteFooter />
       </body>
     </html>
   );
