@@ -19,15 +19,16 @@ Simplified or preloaded pieces are fine where they don't weaken that flow. Progr
 6. [x] **Icebreaker:** "Draft intro" button → Gemini → safety check → shown on screen
 7. [x] **Stretch, only if time allows:** "Simulate semester end" button (course becomes an alumni group)
 8. [ ] **Rehearsal:** full pass on the deployed site, bug fixes, demo script
-9. [ ] **UI polish: Helly's UI set (#25–#30).** Chosen over the port of Shaad's components (PR #24, closed unmerged; branch kept for reference). PR #2 stays open; it isn't merged as is.
+9. [x] **UI polish: Helly's UI set (#25–#30).** Chosen over the port of Shaad's components (PR #24, closed unmerged; branch kept for reference). PR #2 stays open; it isn't merged as is.
    - [x] #25 design tokens, fonts, nav bar (merged Nov 25)
-   - [ ] #26 match card with editable intro
-   - [ ] #27 course page and alumni banner
-   - [ ] #28 courses list
-   - [ ] #29 login and code screens
-   - [ ] #30 home page
-   - [ ] Tap targets to 44px for the phone demo (asked Helly on #25)
-   - [ ] After #29 lands: rerun `predemo_check.py` (its login check now looks for the field label, which both versions have)
+   - [x] #26 match card with editable intro (merged Nov 26)
+   - [x] #27 course page and alumni banner (merged Nov 26)
+   - [x] #28 courses list (merged Nov 26)
+   - [x] #29 login and code screens (merged Nov 26)
+   - [x] #30 home page (merged Nov 26)
+   - [x] Tap targets to 44px for the phone demo (Helly's follow-up commits)
+   - [ ] Rerun `predemo_check.py` against the new login page
+10. [x] **Small additions (cutoff Nov 28):** Leave course (API #33, button #34), red header and simple footer (#35), login-page motif (#36)
 
 ## Deliberately out of scope for Dec 5
 - LangGraph pipeline orchestration and LangSmith tracing
