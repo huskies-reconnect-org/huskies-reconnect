@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api, ApiError, type Course, type Match, type Me } from "@/lib/api";
 import { useRequireSession } from "@/lib/useSession";
+import { LeaveCourse } from "@/components/LeaveCourse";
 import { MatchCard } from "@/components/MatchCard";
 import { PawIcon } from "@/components/PawLogo";
 
@@ -201,6 +202,8 @@ export default function CourseMatchesPage() {
             </ul>
           </>
         )}
+
+        {course?.joined && state.kind !== "loading" && <LeaveCourse course={course} />}
       </main>
     </div>
   );
