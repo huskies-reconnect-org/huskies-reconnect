@@ -75,7 +75,7 @@ export function NavBar() {
 
   return (
     <nav className="border-b border-line bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 sm:px-6">
+      <div className="flex w-full flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 sm:px-6 lg:px-10">
         <Link href="/" className="group inline-flex min-h-11 items-center text-ink">
           <Wordmark />
         </Link>

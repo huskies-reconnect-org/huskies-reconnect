@@ -17,7 +17,7 @@ export function PawTrail() {
       {TRAILS.map((t, ti) => (
         <div
           key={ti}
-          className="absolute flex items-center gap-7"
+          className="absolute flex items-center gap-10"
           style={{ left: t.left, top: t.top, transform: `rotate(${t.angle}deg)`, transformOrigin: "left center" }}
         >
           {Array.from({ length: STEPS }, (_, i) => (
@@ -26,10 +26,10 @@ export function PawTrail() {
               className="paw-print block"
               style={{
                 animationDelay: `${t.delay + i * 0.45}s`,
-                transform: `translateY(${i % 2 ? 11 : -11}px) rotate(90deg)`,
+                transform: `translateY(${i % 2 ? 16 : -16}px) rotate(90deg)`,
               }}
             >
-              <PawIcon className="h-6 w-6 fill-[#efd0d5]" />
+              <PawIcon className="h-9 w-9 fill-[#efd0d5]" />
             </span>
           ))}
         </div>
