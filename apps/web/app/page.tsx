@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { api, type Me } from "@/lib/api";
 import { useRequireSession } from "@/lib/useSession";
 import { MotionQuote } from "@/components/MotionQuote";
-import { PawIcon } from "@/components/PawLogo";
+import { HuskyReunion } from "@/components/HuskyReunion";
 
 export default function Home() {
   const session = useRequireSession();
@@ -40,6 +40,14 @@ export default function Home() {
         </p>
       )}
 
+      <section className="flex flex-col items-center gap-6 overflow-hidden rounded-[22px] border border-line bg-white px-6 py-9 sm:px-12 sm:py-10 lg:flex-row lg:justify-between lg:gap-10">
+        <div className="w-full min-w-0 flex-1">
+          <p className="text-sm font-semibold uppercase tracking-wider text-husky-deep">Why Huskies Reconnect</p>
+          <MotionQuote size="lg" className="mt-4" />
+        </div>
+        <HuskyReunion className="shrink-0 [zoom:0.9] sm:[zoom:1]" />
+      </section>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Link
           href="/courses"
@@ -69,11 +77,6 @@ export default function Home() {
         </Link>
       </div>
 
-      <section className="relative overflow-hidden rounded-[22px] border border-line bg-white px-6 py-10 sm:px-12 sm:py-14">
-        <PawIcon className="absolute -right-6 -top-6 h-36 w-36 rotate-[20deg] fill-blush" />
-        <p className="relative text-sm font-semibold uppercase tracking-wider text-husky-deep">Why Huskies Reconnect</p>
-        <MotionQuote size="lg" className="relative mt-4 max-w-3xl" />
-      </section>
     </main>
   );
 }
