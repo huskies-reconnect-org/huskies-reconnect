@@ -74,7 +74,7 @@ export function NavBar() {
                 key={l.href}
                 href={l.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-lg px-3.5 py-2.5 text-[15px] ${
+                className={`inline-flex min-h-11 items-center rounded-lg px-3.5 text-[15px] ${
                   active ? "bg-sand font-semibold text-ink" : "font-medium text-muted hover:text-ink"
                 }`}
               >
@@ -89,23 +89,23 @@ export function NavBar() {
             aria-haspopup="menu"
             aria-expanded={open}
             aria-label="Account menu"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white"
           >
             {initialsFromEmail(email)}
           </button>
           {open && (
             <div
               role="menu"
-              className="absolute right-0 top-12 z-20 flex w-60 flex-col rounded-2xl border border-line bg-white p-2 shadow-[0_12px_32px_rgba(26,26,26,0.12)]"
+              className="absolute right-0 top-[52px] z-20 flex w-60 flex-col rounded-2xl border border-line bg-white p-2 shadow-[0_12px_32px_rgba(26,26,26,0.12)]"
             >
               <p className="mb-1.5 truncate border-b border-sand px-3 pb-3 pt-2 text-sm text-muted">{email}</p>
-              <Link role="menuitem" href="/profile" className="rounded-lg px-3 py-2.5 text-[15px] hover:bg-sand">
+              <Link role="menuitem" href="/profile" className="flex min-h-11 items-center rounded-lg px-3 text-[15px] hover:bg-sand">
                 Edit profile
               </Link>
               <button
                 role="menuitem"
                 onClick={signOut}
-                className="rounded-lg px-3 py-2.5 text-left text-[15px] hover:bg-sand"
+                className="flex min-h-11 items-center rounded-lg px-3 text-left text-[15px] hover:bg-sand"
               >
                 Sign out
               </button>
