@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api, type Me } from "@/lib/api";
 import { useRequireSession } from "@/lib/useSession";
+import { MotionQuote } from "@/components/MotionQuote";
+import { PawIcon } from "@/components/PawLogo";
 
 export default function Home() {
   const session = useRequireSession();
@@ -66,6 +68,12 @@ export default function Home() {
           <span className="mt-auto pt-2 text-sm font-semibold text-husky-deep">Open →</span>
         </Link>
       </div>
+
+      <section className="relative overflow-hidden rounded-[22px] border border-line bg-white px-6 py-10 sm:px-12 sm:py-14">
+        <PawIcon className="absolute -right-6 -top-6 h-36 w-36 rotate-[20deg] fill-blush" />
+        <p className="relative text-sm font-semibold uppercase tracking-wider text-husky-deep">Why Huskies Reconnect</p>
+        <MotionQuote size="lg" className="relative mt-4 max-w-3xl" />
+      </section>
     </main>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { isAllowedEmail, supabase } from "@/lib/supabase";
 import { CodeInput } from "@/components/CodeInput";
 import { LoginHero } from "@/components/LoginHero";
+import { MotionQuote } from "@/components/MotionQuote";
 
 // Email -> 6-digit code -> signed in.
 // We use a typed code instead of a magic link because Microsoft 365 Safe Links
@@ -209,6 +210,11 @@ export default function LoginPage() {
             </li>
           ))}
         </ol>
+
+        <div className="hero-in mt-2 flex max-w-xl gap-3 border-t border-line pt-6" style={{ animationDelay: "0.4s" }}>
+          <span aria-hidden="true" className="-mt-2 font-display text-5xl font-bold leading-none text-husky">&ldquo;</span>
+          <MotionQuote className="min-w-0 flex-1" />
+        </div>
       </section>
 
       <section className="flex min-w-0 flex-[1_1_400px] justify-center">

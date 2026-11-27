@@ -102,8 +102,25 @@ body {
 .hero-type { clip-path: inset(0 100% 0 0); animation: hero-type 1.4s steps(36, end) 1s forwards; }
 @keyframes hero-type { to { clip-path: inset(0 0 0 0); } }
 
+/* Motion quote (components/MotionQuote.tsx): 5 lines x 4 s. Each line's words rise in
+   one after another, hold, then lift away; the window (0-20%) is one line's share of the cycle. */
+.mq-word {
+  opacity: 0;
+  animation-name: mq-word;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation-iteration-count: infinite;
+  animation-fill-mode: backwards;
+}
+@keyframes mq-word {
+  0% { opacity: 0; translate: 0 0.55em; }
+  2.5%, 17% { opacity: 1; translate: 0 0; }
+  19.5%, 100% { opacity: 0; translate: 0 -0.35em; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .paw-trail { display: none; }
+  .mq-word { animation: none; }
+  .mq-line:first-child .mq-word { opacity: 1; }
   .paw-step, .group:hover .paw-wave, .hero-float-a, .hero-float-b, .hero-badge { animation: none; }
   .paw-step { opacity: 1; }
   .hero-in, .hero-pop, .hero-paw { animation: none; opacity: 1; }
