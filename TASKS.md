@@ -29,6 +29,7 @@ Simplified or preloaded pieces are fine where they don't weaken that flow. Progr
    - [x] Tap targets to 44px for the phone demo (Helly's follow-up commits)
    - [ ] Rerun `predemo_check.py` against the new login page
 10. [x] **Small additions (cutoff Nov 28):** Leave course (API #33, button #34), red header and simple footer (#35), login-page motif (#36)
+11. [x] **Match the reference designs** (login, code screen, profile with avatar color and badge, paw motion): #38, #39. Footer and red header from #35 removed; motif from #36 replaced by the animated illustration.
 
 ## Deliberately out of scope for Dec 5
 - LangGraph pipeline orchestration and LangSmith tracing
