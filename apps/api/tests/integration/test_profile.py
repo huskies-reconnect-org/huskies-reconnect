@@ -94,3 +94,30 @@ def test_profile_input_is_trimmed(client, make_user):
     client.login(make_user())
     r = client.put("/me/profile", json={**PROFILE, "major": "  Data Science  "})
     assert r.json()["major"] == "Data Science"
+
+
+def test_avatar_color_and_badge_saved_and_returned(client, make_user, embedder):
+    client.login(make_user())
+    r = client.put("/me/profile", json={**PROFILE, "avatar_color": "sky", "avatar_badge": "NLP"})
+    assert r.status_code == 200, r.text
+    assert r.json()["avatar_color"] == "sky" and r.json()["avatar_badge"] == "NLP"
+    assert r.json()["embedding_status"] == "updated"
+    me = client.get("/me").json()
+    assert me["avatar_color"] == "sky" and me["avatar_badge"] == "NLP"
+    # Changing only the look doesn't re-embed.
+    r = client.put("/me/profile", json={**PROFILE, "avatar_color": "mint"})
+    assert r.json()["embedding_status"] == "unchanged" and embedder.calls == 1
+    assert r.json()["avatar_color"] == "mint" and r.json()["avatar_badge"] is None
+
+
+def test_avatar_defaults_to_none(client, make_user):
+    client.login(make_user())
+    r = client.put("/me/profile", json=PROFILE)
+    assert r.json()["avatar_color"] is None and r.json()["avatar_badge"] is None
+
+
+@pytest.mark.parametrize("patch", [{"avatar_color": "neon"}, {"avatar_badge": "x" * 101}, {"avatar_badge": "  "}])
+def test_invalid_avatar_is_422(client, make_user, patch):
+    client.login(make_user())
+    assert client.put("/me/profile", json={**PROFILE, **patch}).status_code == 422
+

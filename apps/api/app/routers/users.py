@@ -17,9 +17,14 @@ router = APIRouter(tags=["users"])
 
 _ME_SELECT = """
     select id::text, email, full_name, major, grad_year, interests, goals,
+           avatar_color, avatar_badge,
            embedding is not null as matchable, embedding_model
       from public.users where id = %s
 """
+
+
+# Must match the check constraint in migration 20261127010000_users_avatar.sql.
+AvatarColor = Literal["blush", "sky", "peach", "mint", "lavender", "butter", "teal", "stone"]
 
 
 class Me(BaseModel):
@@ -30,6 +35,8 @@ class Me(BaseModel):
     grad_year: int | None
     interests: str | None
     goals: str | None
+    avatar_color: AvatarColor | None
+    avatar_badge: str | None
     profile_complete: bool
     matchable: bool  # has an embedding, so can appear in matches
     is_admin: bool
@@ -68,6 +75,9 @@ class ProfileIn(BaseModel):
     grad_year: int | None = Field(default=None, ge=2020, le=2035)
     interests: Long
     goals: Long
+    # Optional so older clients keep working; omitted means "no choice" (cleared).
+    avatar_color: AvatarColor | None = None
+    avatar_badge: Short | None = None
 
 
 class ProfileOut(Me):
@@ -103,6 +113,7 @@ async def update_profile(
         """update public.users
               set full_name = %(full_name)s, major = %(major)s, grad_year = %(grad_year)s,
                   interests = %(interests)s, goals = %(goals)s,
+                  avatar_color = %(avatar_color)s, avatar_badge = %(avatar_badge)s,
                   embedding       = coalesce(%(embedding)s::extensions.vector, embedding),
                   embedding_model = case when %(embedding)s::text is null then embedding_model else %(model)s end,
                   embedded_at     = case when %(embedding)s::text is null then embedded_at else now() end

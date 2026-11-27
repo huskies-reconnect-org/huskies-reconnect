@@ -32,7 +32,7 @@ They rebuild the schema from `schema/supabase/migrations/` on every run.
 | GET | `/courses/{id}/matches` | yes | Classmates ranked by profile similarity (members only, above `MATCH_MIN_SIMILARITY`, labeled strong / good / possible) |
 | POST | `/courses/{id}/matches/{classmate_id}/icebreaker` | yes | AI-drafted intro (Gemini) for a pair above the relevance bar; safety-checked; 10 per 10 min per user |
 | POST | `/courses/{id}/semester` | admin | `{"action": "end" \| "reset"}`: simulate semester end (members become alumni) or undo |
-| PUT | `/me/profile` | yes | Save profile; re-embeds via Gemini when major/interests/goals change |
+| PUT | `/me/profile` | yes | Save profile, including optional `avatar_color` and `avatar_badge`; re-embeds via Gemini when interests/goals change |
 
 ## Demo classmates
 8 fictional students in CS5100 (2 also in CS6120), flagged `is_demo`, with real Gemini embeddings.
