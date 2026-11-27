@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { api, type Me } from "@/lib/api";
 import { useRequireSession } from "@/lib/useSession";
 import { MotionQuote } from "@/components/MotionQuote";
-import { HuskyReunion } from "@/components/HuskyReunion";
+import { HighFiveHuskies } from "@/components/HighFiveHuskies";
 
 export default function Home() {
   const session = useRequireSession();
@@ -45,7 +45,7 @@ export default function Home() {
           <p className="text-sm font-semibold uppercase tracking-wider text-husky-deep">Why Huskies Reconnect</p>
           <MotionQuote size="lg" className="mt-4" />
         </div>
-        <HuskyReunion className="shrink-0 [zoom:0.9] sm:[zoom:1]" />
+        <HighFiveHuskies className="-my-4 [zoom:0.85] sm:[zoom:1]" />
       </section>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
