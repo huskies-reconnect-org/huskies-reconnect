@@ -28,6 +28,7 @@ They rebuild the schema from `schema/supabase/migrations/` on every run.
 | GET | `/me` | yes | Current user's profile row |
 | GET | `/courses` | yes | Course list with member counts and `joined` |
 | POST | `/courses/{id}/join` | yes | Join a course (idempotent) |
+| DELETE | `/courses/{id}/join` | yes | Leave a course, active or alumni (idempotent) |
 | GET | `/courses/{id}/matches` | yes | Classmates ranked by profile similarity (members only, above `MATCH_MIN_SIMILARITY`, labeled strong / good / possible) |
 | POST | `/courses/{id}/matches/{classmate_id}/icebreaker` | yes | AI-drafted intro (Gemini) for a pair above the relevance bar; safety-checked; 10 per 10 min per user |
 | POST | `/courses/{id}/semester` | admin | `{"action": "end" \| "reset"}`: simulate semester end (members become alumni) or undo |
