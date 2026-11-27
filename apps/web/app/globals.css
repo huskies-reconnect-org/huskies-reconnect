@@ -33,3 +33,78 @@ body {
 .on-red:focus-visible {
   outline-color: #fff;
 }
+
+/* Login-page motif (components/ReconnectMotif.tsx): connected -> fades after finals -> redraws.
+   One 8s loop, transforms and opacity only. Reduced motion shows the connected state, still. */
+.rm-link {
+  stroke: var(--color-husky);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  animation: rm-link 8s ease-in-out infinite;
+  animation-delay: calc(var(--rm-i) * 0.15s);
+}
+.rm-gap {
+  stroke: var(--color-field);
+  stroke-width: 2;
+  stroke-dasharray: 3 4;
+  opacity: 0;
+  animation: rm-gap 8s ease-in-out infinite;
+  animation-delay: calc(var(--rm-i) * 0.15s);
+}
+.rm-node {
+  transform-box: fill-box;
+  animation: rm-node 8s ease-in-out infinite;
+}
+.rm-initials {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+}
+.rm-captions > .rm-cap {
+  grid-area: 1 / 1;
+  opacity: 0;
+  /* Longhands: the CSS minifier turns a name-less `animation` shorthand into `none`. */
+  animation-duration: 8s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+.rm-captions > .rm-cap-1 { animation-name: rm-cap-1; }
+.rm-captions > .rm-cap-2 { animation-name: rm-cap-2; }
+.rm-captions > .rm-cap-3 { animation-name: rm-cap-3; }
+
+@keyframes rm-link {
+  0%, 20% { stroke-dashoffset: 0; }
+  36%, 58% { stroke-dashoffset: 1; }
+  76%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes rm-gap {
+  0%, 22% { opacity: 0; }
+  34%, 60% { opacity: 1; }
+  72%, 100% { opacity: 0; }
+}
+@keyframes rm-node {
+  0%, 20% { opacity: 1; transform: translateX(0); }
+  36%, 58% { opacity: 0.35; transform: translateX(var(--rm-drift)); }
+  76%, 100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes rm-cap-1 {
+  0%, 18% { opacity: 1; }
+  26%, 96% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes rm-cap-2 {
+  0%, 24% { opacity: 0; }
+  32%, 58% { opacity: 1; }
+  66%, 100% { opacity: 0; }
+}
+@keyframes rm-cap-3 {
+  0%, 68% { opacity: 0; }
+  78%, 92% { opacity: 1; }
+  98%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rm-link, .rm-gap, .rm-node, .rm-captions > .rm-cap { animation: none; }
+  .rm-captions > .rm-cap-3 { opacity: 1; }
+}

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { isAllowedEmail, supabase } from "@/lib/supabase";
 import { PawIcon, Wordmark } from "@/components/PawLogo";
+import { ReconnectMotif } from "@/components/ReconnectMotif";
 
 // Minimal login: email -> 6-digit code -> signed in.
 // We use a typed code instead of a magic link because Microsoft 365 Safe Links
@@ -69,6 +70,7 @@ export default function LoginPage() {
       {step === "email" ? (
         <main className="mx-auto flex w-full max-w-6xl flex-1 flex-wrap items-center gap-14 px-4 pb-16 pt-10 sm:px-6">
           <section className="flex min-w-0 flex-[1_1_440px] flex-col gap-6">
+            <ReconnectMotif />
             <p className="text-sm font-semibold uppercase tracking-wider text-husky-deep">For Northeastern students</p>
             <h1 className="max-w-xl font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-[54px]">
               Your classmates shouldn&apos;t vanish after finals.
