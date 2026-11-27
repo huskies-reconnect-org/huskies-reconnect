@@ -89,7 +89,7 @@ export default function CourseMatchesPage() {
   );
 
   return (
-    <div className="min-h-screen">
+    <div className="flex-1">
       {alumni ? (
         <section className="bg-ink text-white">
           <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 pb-11 pt-7 sm:px-6">

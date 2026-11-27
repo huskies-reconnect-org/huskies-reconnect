@@ -37,7 +37,7 @@ export default function CoursesPage() {
   const others = courses?.filter((c) => !c.joined) ?? [];
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-4 pb-16 pt-9 sm:px-6">
+    <main className="mx-auto flex w-full flex-1 max-w-5xl flex-col gap-8 px-4 pb-16 pt-9 sm:px-6">
       <header className="flex flex-col gap-2">
         <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">Your Fall 2026 courses</h1>
         <p className="text-muted">Join the courses you&apos;re taking to find classmates worth meeting.</p>

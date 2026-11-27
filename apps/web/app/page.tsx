@@ -20,7 +20,7 @@ export default function Home() {
   const firstName = me?.full_name?.trim().split(/\s+/)[0];
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-4 pb-16 pt-10 sm:px-6">
+    <main className="mx-auto flex w-full flex-1 max-w-5xl flex-col gap-8 px-4 pb-16 pt-10 sm:px-6">
       <header className="flex flex-col gap-2">
         <h1 className="font-display text-3xl font-bold tracking-tight sm:text-[38px]">
           Welcome{firstName ? ` back, ${firstName}` : ""}

@@ -58,7 +58,7 @@ export default function ProfilePage() {
   const noticeColor = { ok: "text-green-700", warn: "text-amber-700", error: "text-red-600" };
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
+    <main className="mx-auto flex w-full flex-1 max-w-xl flex-col gap-6 p-6">
       <header className="flex items-baseline justify-between">
         <h1 className="text-2xl font-semibold">Your profile</h1>
         <Link href="/" className="text-sm underline">Home</Link>

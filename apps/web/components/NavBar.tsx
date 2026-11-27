@@ -61,10 +61,10 @@ export function NavBar() {
   const email = session.user.email;
 
   return (
-    <nav className="border-b border-line bg-white">
+    <nav className="bg-husky text-white">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 sm:px-6">
-        <Link href="/" className="text-ink">
-          <Wordmark />
+        <Link href="/" className="on-red text-white">
+          <Wordmark inverse />
         </Link>
         <div className="flex flex-1 gap-1">
           {LINKS.map((l) => {
@@ -74,8 +74,8 @@ export function NavBar() {
                 key={l.href}
                 href={l.href}
                 aria-current={active ? "page" : undefined}
-                className={`inline-flex min-h-11 items-center rounded-lg px-3.5 text-[15px] ${
-                  active ? "bg-sand font-semibold text-ink" : "font-medium text-muted hover:text-ink"
+                className={`on-red inline-flex min-h-11 items-center rounded-lg px-3.5 text-[15px] ${
+                  active ? "bg-white font-semibold text-husky-ink" : "font-medium text-white/90 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 {l.label}
@@ -89,14 +89,14 @@ export function NavBar() {
             aria-haspopup="menu"
             aria-expanded={open}
             aria-label="Account menu"
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white"
+            className="on-red flex h-11 w-11 items-center justify-center rounded-full bg-white text-sm font-semibold text-husky-ink"
           >
             {initialsFromEmail(email)}
           </button>
           {open && (
             <div
               role="menu"
-              className="absolute right-0 top-[52px] z-20 flex w-60 flex-col rounded-2xl border border-line bg-white p-2 shadow-[0_12px_32px_rgba(26,26,26,0.12)]"
+              className="absolute right-0 top-[52px] z-20 flex w-60 flex-col rounded-2xl border border-line bg-white p-2 text-ink shadow-[0_12px_32px_rgba(26,26,26,0.12)]"
             >
               <p className="mb-1.5 truncate border-b border-sand px-3 pb-3 pt-2 text-sm text-muted">{email}</p>
               <Link role="menuitem" href="/profile" className="flex min-h-11 items-center rounded-lg px-3 text-[15px] hover:bg-sand">
