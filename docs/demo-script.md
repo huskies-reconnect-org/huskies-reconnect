@@ -21,7 +21,7 @@ Live site: https://huskies-reconnect.vercel.app
 | # | Click | Say (short version) |
 |---|---|---|
 | 1 | *(no click)* | "Canvas shows you exactly who's in your class. When the semester ends, that's gone. Huskies Reconnect keeps those connections, and brings them back when they matter." |
-| 2 | **/login tab**: type a `@gmail.com` address → Send code | "Only Northeastern students get in. This is checked on the server too, by a Supabase signup hook, not just here." Switch to the signed-in tab. |
+| 2 | **/login tab**: type a `@gmail.com` address → Get my code | "Only Northeastern students get in. This is checked on the server too, by a Supabase signup hook, not just here." Switch to the signed-in tab. |
 | 3 | **Edit profile** | "You describe your interests and goals. We turn that into an embedding with Gemini, a vector that captures meaning, so 'NLP' and 'language models' land close together." |
 | 4 | **Your courses** → **CS5100 → See classmates** | "Here are classmates ranked by how much you actually have in common." |
 | 5 | Point at the **Strong / Good / Possible** labels and a **Demo profile** tag | "Only people above a relevance bar show up. We tuned it on real embeddings, so unrelated profiles don't appear as 80% matches. These are seeded demo students, and they're labeled honestly." |

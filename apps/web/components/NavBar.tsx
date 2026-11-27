@@ -4,14 +4,16 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
+import { api, type Me } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
+import { Avatar } from "@/components/Avatar";
 import { Wordmark } from "@/components/PawLogo";
 
-function initialsFromEmail(email: string | undefined): string {
-  const local = (email ?? "").split("@")[0];
-  const parts = local.split(/[._-]+/).filter(Boolean);
-  const letters = parts.length > 1 ? parts[0][0] + parts[1][0] : local.slice(0, 2);
-  return letters.toUpperCase() || "?";
+/** The profile page fires this after saving, so the avatar updates without a reload. */
+export const PROFILE_UPDATED = "huskies:profile-updated";
+
+function nameFromEmail(email: string | undefined): string {
+  return (email ?? "").split("@")[0].split(/[._-]+/).filter(Boolean).join(" ");
 }
 
 const LINKS = [
@@ -23,6 +25,7 @@ export function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);
+  const [me, setMe] = useState<Me | null>(null);
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -32,6 +35,16 @@ export function NavBar() {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => setSession(s));
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  // Name and avatar look for the account button.
+  const userId = session?.user.id;
+  useEffect(() => {
+    if (!userId) return setMe(null);
+    api<Me>("/me").then(setMe).catch(() => {});
+    const onUpdate = (e: Event) => setMe((e as CustomEvent<Me>).detail);
+    window.addEventListener(PROFILE_UPDATED, onUpdate);
+    return () => window.removeEventListener(PROFILE_UPDATED, onUpdate);
+  }, [userId]);
 
   useEffect(() => setOpen(false), [pathname]);
 
@@ -61,10 +74,10 @@ export function NavBar() {
   const email = session.user.email;
 
   return (
-    <nav className="bg-husky text-white">
+    <nav className="border-b border-line bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 sm:px-6">
-        <Link href="/" className="on-red text-white">
-          <Wordmark inverse />
+        <Link href="/" className="group inline-flex min-h-11 items-center text-ink">
+          <Wordmark />
         </Link>
         <div className="flex flex-1 gap-1">
           {LINKS.map((l) => {
@@ -74,8 +87,8 @@ export function NavBar() {
                 key={l.href}
                 href={l.href}
                 aria-current={active ? "page" : undefined}
-                className={`on-red inline-flex min-h-11 items-center rounded-lg px-3.5 text-[15px] ${
-                  active ? "bg-white font-semibold text-husky-ink" : "font-medium text-white/90 hover:bg-white/10 hover:text-white"
+                className={`inline-flex min-h-11 items-center rounded-lg px-3.5 text-[15px] ${
+                  active ? "bg-sand font-semibold text-ink" : "font-medium text-muted hover:text-ink"
                 }`}
               >
                 {l.label}
@@ -89,9 +102,9 @@ export function NavBar() {
             aria-haspopup="menu"
             aria-expanded={open}
             aria-label="Account menu"
-            className="on-red flex h-11 w-11 items-center justify-center rounded-full bg-white text-sm font-semibold text-husky-ink"
+            className="flex rounded-full"
           >
-            {initialsFromEmail(email)}
+            <Avatar id={session.user.id} name={me?.full_name || nameFromEmail(email)} color={me?.avatar_color} size="sm" />
           </button>
           {open && (
             <div

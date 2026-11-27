@@ -3,6 +3,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { api, type Icebreaker, type Match } from "@/lib/api";
 import { Avatar } from "@/components/Avatar";
+import { PawLoader } from "@/components/PawLogo";
+import { splitInterests } from "@/lib/avatar";
 
 // Raw cosine similarity isn't shown: unrelated profiles still score ~0.8, which would read as "80%".
 const STRENGTH = {
@@ -17,14 +19,6 @@ type Draft =
   | { kind: "ok"; message: string }
   | { kind: "blocked" }
   | { kind: "error"; message: string };
-
-// Display only: the profile stores interests as free text, usually comma-separated.
-function interestTags(interests: string | null): string[] {
-  return (interests ?? "")
-    .split(/[,;\n]/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
 
 /** Reveals `full` a few characters at a time, then hands it over for editing. */
 function useTypedText(full: string | null): { text: string; typing: boolean } {
@@ -101,13 +95,13 @@ export function MatchCard({ courseId, match: m }: { courseId: string; match: Mat
   }
 
   const s = STRENGTH[m.strength];
-  const tags = interestTags(m.interests);
+  const tags = splitInterests(m.interests);
   const firstName = (m.full_name ?? "").split(" ")[0] || "your classmate";
 
   return (
     <li className="flex flex-col gap-4 rounded-2xl border border-line bg-white p-5 sm:p-6">
       <div className="flex flex-wrap items-center gap-4">
-        <Avatar id={m.user_id} name={m.full_name} />
+        <Avatar id={m.user_id} name={m.full_name} color={m.avatar_color} badge={m.avatar_badge} />
         <div className="flex min-w-[11rem] flex-1 flex-col gap-0.5">
           <p className="flex flex-wrap items-center gap-2 text-lg font-semibold">
             {m.full_name ?? "Classmate"}
@@ -163,7 +157,7 @@ export function MatchCard({ courseId, match: m }: { courseId: string; match: Mat
 
       {draft.kind === "loading" && (
         <p className="flex items-center gap-2 text-sm font-medium text-husky-deep" role="status">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-husky" aria-hidden="true" />
+          <PawLoader />
           Drafting an intro…
         </p>
       )}

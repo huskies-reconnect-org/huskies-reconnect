@@ -51,6 +51,9 @@ export type Me = {
   grad_year: number | null;
   interests: string | null;
   goals: string | null;
+  // Optional until the avatar migration is live everywhere (PR #38).
+  avatar_color?: string | null;
+  avatar_badge?: string | null;
   profile_complete: boolean;
   matchable: boolean;
   is_admin: boolean;
@@ -62,6 +65,8 @@ export type ProfileIn = {
   grad_year: number | null;
   interests: string;
   goals: string;
+  avatar_color?: string | null;
+  avatar_badge?: string | null;
 };
 
 export type ProfileOut = Me & { embedding_status: "updated" | "unchanged" | "failed" };
@@ -73,6 +78,8 @@ export type Match = {
   grad_year: number | null;
   interests: string | null;
   goals: string | null;
+  avatar_color?: string | null;
+  avatar_badge?: string | null;
   similarity: number;
   strength: "strong" | "good" | "possible";
   is_demo: boolean;
